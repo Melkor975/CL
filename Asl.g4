@@ -44,8 +44,12 @@ statements
 statement
           // Assignment Not Logical
         : left_expr ASSIGN expr ';'           # assignStmt
+          //crida void function
+        | ID '(' ( |expr (',' expr)*) ')' ';'    #func_Stmt
           // Return
-        | 'return' expr ';'                   # return
+        | 'return' (|expr) ';'                # return
+          //WHILE
+        | WHILE expr DO statements ENDWHILE   #whileStmt
           // if-then-else statement (else is optional)
         | IF expr THEN statements ENDIF       # ifStmt
           // A function/procedure call has a list of arguments in parenthesis (possibly empty)
@@ -59,15 +63,14 @@ statement
         ;
 // Grammar for left expressions (l-values in C++)
 left_expr
-        : ident                                 
-        | ID '[' expr ']'                     
+        : ident ( |'[' expr ']')       
         ;
 
 // Grammar for expressions with boolean, relational and aritmetic operators
-expr    : ID '[' expr ']'                      # array_read
+expr    : ident '[' expr ']'                      # array_read
         | op=(NOT|PLUS|MINUS) expr             # arithmetic
         | '(' expr ')'                         # par
-        | ID '(' ( |expr (',' expr)*) ')'      # call_func
+        | ident '(' ( |expr (',' expr)*) ')'      # call_func
         | expr op=(MUL|DIV) expr               # arithmetic
         | expr op=(PLUS|MINUS) expr            # arithmetic
 	      | expr op=(EQUAL|NE|GT|GE|LE|LT)  expr # relational
@@ -120,6 +123,10 @@ IF        : 'if' ;
 THEN      : 'then' ;
 ELSE      : 'else' ;
 ENDIF     : 'endif' ;
+WHILE     : 'while';
+DO        : 'do' ;
+ENDWHILE  : 'endwhile';
+
 FUNC      : 'func' ;
 ENDFUNC   : 'endfunc' ;
 READ      : 'read' ;
