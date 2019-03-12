@@ -10,14 +10,14 @@ program : function+ EOF
 
 // A function has a name, a list of parameters and a list of statements
 function
-        : (FUNC ID '(' (|parameter_declarations) ')' (|return_type) declarations statements ENDFUNC)
+        : (FUNC ID '(' (|parameter_decl) ')' (|return_type) declarations statements ENDFUNC)
         ;
 
 return_type
         : ':' type
         ;
 
-parameter_declarations
+parameter_decl
         : ID ':' type (',' ID ':' type)*
         ;
 
@@ -29,7 +29,8 @@ variable_decl
         : VAR ID (',' ID)* ':' type
         ;
 
-type    : INT
+type    : ARRAY '[' expr ']' OF type
+        | INT
         | BOOL
         | FLOAT
         | CHAR
@@ -58,13 +59,15 @@ statement
         ;
 // Grammar for left expressions (l-values in C++)
 left_expr
-        : ident
+        : ident                                 
+        | ID '[' expr ']'                     
         ;
 
 // Grammar for expressions with boolean, relational and aritmetic operators
-expr    : op=(NOT|PLUS|MINUS) expr             # arithmetic
+expr    : ID '[' expr ']'                      # array_read
+        | op=(NOT|PLUS|MINUS) expr             # arithmetic
         | '(' expr ')'                         # par
-        | ID '(' ( |expr (',' expr)*) ')'       # call_func
+        | ID '(' ( |expr (',' expr)*) ')'      # call_func
         | expr op=(MUL|DIV) expr               # arithmetic
         | expr op=(PLUS|MINUS) expr            # arithmetic
 	      | expr op=(EQUAL|NE|GT|GE|LE|LT)  expr # relational
@@ -72,7 +75,7 @@ expr    : op=(NOT|PLUS|MINUS) expr             # arithmetic
 	      | expr op=OR   expr		                 # logic
 //      | (INTVAL|FLOATVAL|CHARVAL)            # value
         | INTVAL			                         # value		
-      	| FLOATVAL			                       # value
+      	| FLOATVAL			                         # value
        	| CHARVAL			                         # value
         | ident                              # exprIdent
         ;
@@ -110,6 +113,8 @@ INT       : 'int';
 BOOL      : 'bool';
 FLOAT     : 'float';
 CHAR      : 'char';
+ARRAY     : 'array';
+OF        : 'of';
 
 IF        : 'if' ;
 THEN      : 'then' ;
