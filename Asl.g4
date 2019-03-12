@@ -45,13 +45,13 @@ statement
           // Assignment Not Logical
         : left_expr ASSIGN expr ';'           # assignStmt
           //crida void function
-        | ID '(' ( |expr (',' expr)*) ')' ';'    #func_Stmt
+        | ID '(' ( |expr (',' expr)*) ')' ';' #func_Stmt
           // Return
         | 'return' (|expr) ';'                # return
           //WHILE
         | WHILE expr DO statements ENDWHILE   #whileStmt
           // if-then-else statement (else is optional)
-        | IF expr THEN statements ENDIF       # ifStmt
+        | IF expr THEN statements (|ELSE) ENDIF       # ifStmt
           // A function/procedure call has a list of arguments in parenthesis (possibly empty)
         | ident '(' ')' ';'                   # procCall
           // Read a variable
