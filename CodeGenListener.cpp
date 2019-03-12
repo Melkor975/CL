@@ -90,6 +90,22 @@ void CodeGenListener::exitDeclarations(AslParser::DeclarationsContext *ctx) {
   DEBUG_EXIT();
 }
 
+void CodeGenListener::enterParameter_decl(AslParser::Parameter_declContext *ctx){
+  DEBUG_ENTER();
+}
+void CodeGenListener::exitParameter_decl(AslParser::Parameter_declContext *ctx){
+  int iType = 0;
+  for(auto i : ctx->ID()) {
+    subroutine       & subrRef = Code.get_last_subroutine();
+    TypesMgr::TypeId        t1 = getTypeDecor(ctx->type(iType));
+    std::size_t           size = Types.getSizeOfType(t1);
+    subrRef.add_var(i->getText(), size);
+    iType++;
+  }
+  DEBUG_EXIT();
+}
+
+
 void CodeGenListener::enterVariable_decl(AslParser::Variable_declContext *ctx) {
   DEBUG_ENTER();
 }
