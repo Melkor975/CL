@@ -10,7 +10,15 @@ program : function+ EOF
 
 // A function has a name, a list of parameters and a list of statements
 function
-        : FUNC ID '(' ')' declarations statements ENDFUNC
+        : (FUNC ID '(' (|parameter_declarations) ')' (|return_type) declarations statements ENDFUNC)
+        ;
+
+return_type
+        : ':' type
+        ;
+
+parameter_declarations
+        : ID ':' type (',' ID ':' type)*
         ;
 
 declarations
@@ -35,6 +43,8 @@ statements
 statement
           // Assignment Not Logical
         : left_expr ASSIGN expr ';'           # assignStmt
+          // Return
+        | 'return' expr ';'                   # return
           // if-then-else statement (else is optional)
         | IF expr THEN statements ENDIF       # ifStmt
           // A function/procedure call has a list of arguments in parenthesis (possibly empty)
@@ -54,6 +64,7 @@ left_expr
 // Grammar for expressions with boolean, relational and aritmetic operators
 expr    : op=(NOT|PLUS|MINUS) expr             # arithmetic
         | '(' expr ')'                         # par
+        | ID '(' ( |expr (',' expr)*) ')'       # call_func
         | expr op=(MUL|DIV) expr               # arithmetic
         | expr op=(PLUS|MINUS) expr            # arithmetic
 	      | expr op=(EQUAL|NE|GT|GE|LE|LT)  expr # relational
@@ -111,7 +122,7 @@ WRITE     : 'write' ;
 ID        : ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')* ;
 INTVAL    : ('0'..'9')+ ;
 FLOATVAL  : ('0'..'9')+ ( | ('.' ('0'..'9')+) );
-CHARVAL   : '\'' ~('\\'|'\'') '\'';                              //AIXO SHA DE MIRAR
+CHARVAL   : '\'' ~('\\'|'\'') '\'';                                     
 BOOLVAL   : ('true'|'false');
 
 // Strings (in quotes) with escape sequences
