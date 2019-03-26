@@ -10,8 +10,8 @@ program : function+ EOF
 
 // A function has a name, a list of parameters and a list of statements
 function
-        //: (FUNC ID '(' (|parameter_decl) ')' (|return_type) declarations statements ENDFUNC)
-        : FUNC ID '(' ')' declarations statements ENDFUNC
+        : (FUNC ID '(' (|parameter_decl) ')' (|return_type) declarations statements ENDFUNC)
+        //: FUNC ID '(' ')' declarations statements ENDFUNC
         ;
 
 return_type
@@ -51,7 +51,7 @@ statement
           // Assignment Not Logical
         : left_expr ASSIGN expr ';'           # assignStmt
           //crida void function
-        | ID '(' ( |expr (',' expr)*) ')' ';' #func_Stmt
+        //| ID '(' ( |expr (',' expr)*) ')' ';' #func_Stmt
           // Return
         | 'return' (|expr) ';'                # return
           //WHILE
@@ -67,6 +67,8 @@ statement
           // Write a string
         | WRITE STRING ';'                    # writeString
         ;
+
+        
 // Grammar for left expressions (l-values in C++)
 left_expr
         : ident ( |'[' expr ']')       
