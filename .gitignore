@@ -21,7 +21,6 @@ AslParser.h
 AslParser.java
 AslParser.o
 Asl.tokens
-check-examples.sh
 CodeGenListener.o
 _deps
 .git/
