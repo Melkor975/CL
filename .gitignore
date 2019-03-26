@@ -26,6 +26,5 @@ CodeGenListener.o
 _deps
 .git/
 main.o
-Makefile
 SymbolsListener.o
 TypeCheckListener.o

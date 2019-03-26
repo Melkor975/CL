@@ -10,7 +10,8 @@ program : function+ EOF
 
 // A function has a name, a list of parameters and a list of statements
 function
-        : (FUNC ID '(' (|parameter_decl) ')' (|return_type) declarations statements ENDFUNC)
+        //: (FUNC ID '(' (|parameter_decl) ')' (|return_type) declarations statements ENDFUNC)
+        : FUNC ID '(' ')' declarations statements ENDFUNC
         ;
 
 return_type
@@ -18,8 +19,13 @@ return_type
         ;
 
 parameter_decl
-        : ID ':' type (',' ID ':' type)*
+        :  pdObj (',' pdObj)*
         ;
+
+pdObj
+        : ID ':' type
+        ;
+
 
 declarations
         : (variable_decl)*
