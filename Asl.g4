@@ -76,7 +76,7 @@ left_expr
 
 // Grammar for expressions with boolean, relational and aritmetic operators
 expr    : ident '[' expr ']'                      # array_read
-        | op=(NOT|PLUS|MINUS) expr             # arithmetic
+        | op=(NOT|PLUS|MINUS) expr             # notplusminus
         | '(' expr ')'                         # par
         | ident '(' ( |expr (',' expr)*) ')'      # call_func
         | expr op=(MUL|DIV) expr               # arithmetic

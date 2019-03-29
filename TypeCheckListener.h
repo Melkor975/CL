@@ -110,6 +110,9 @@ public:
   void enterExprIdent(AslParser::ExprIdentContext *ctx);
   void exitExprIdent(AslParser::ExprIdentContext *ctx);
 
+  void enterLogic(AslParser::LogicContext * ctx);
+  void exitLogic(AslParser::LogicContext * ctx);
+
   void enterIdent(AslParser::IdentContext *ctx);
   void exitIdent(AslParser::IdentContext *ctx);
 

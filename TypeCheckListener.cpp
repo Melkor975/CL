@@ -112,6 +112,7 @@ void TypeCheckListener::exitStatements(AslParser::StatementsContext *ctx) {
 void TypeCheckListener::enterAssignStmt(AslParser::AssignStmtContext *ctx) {
   DEBUG_ENTER();
 }
+
 void TypeCheckListener::exitAssignStmt(AslParser::AssignStmtContext *ctx) {
   TypesMgr::TypeId t1 = getTypeDecor(ctx->left_expr());
   TypesMgr::TypeId t2 = getTypeDecor(ctx->expr());
@@ -215,6 +216,24 @@ void TypeCheckListener::exitRelational(AslParser::RelationalContext *ctx) {
   putIsLValueDecor(ctx, false);
   DEBUG_EXIT();
 }
+
+void TypeCheckListener::enterLogic(AslParser::LogicContext * ctx){
+  DEBUG_ENTER();
+}
+void TypeCheckListener::exitLogic(AslParser::LogicContext * ctx){
+  TypesMgr::TypeId t1 = getTypeDecor(ctx->expr(0));
+  TypesMgr::TypeId t2 = getTypeDecor(ctx->expr(1));
+  std::string oper = ctx->op->getText();
+  if ((not Types.isErrorTy(t1)) and (not Types.isErrorTy(t2)) and
+      (not Types.equalTypes(t1, t2) or not Types.isBooleanTy(t1)))
+    Errors.incompatibleOperator(ctx->op);
+  TypesMgr::TypeId t = Types.createBooleanTy();
+  putTypeDecor(ctx, t);
+  putIsLValueDecor(ctx, false);
+  DEBUG_EXIT();
+}
+
+
 
 void TypeCheckListener::enterValue(AslParser::ValueContext *ctx) {
   DEBUG_ENTER();
