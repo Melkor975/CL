@@ -113,8 +113,14 @@ public:
   void enterLogic(AslParser::LogicContext * ctx);
   void exitLogic(AslParser::LogicContext * ctx);
 
+  void enterPar(AslParser::ParContext *ctx);
+  void exitPar(AslParser::ParContext *ctx);
+
   void enterIdent(AslParser::IdentContext *ctx);
   void exitIdent(AslParser::IdentContext *ctx);
+
+  void enterNotplusminus(AslParser::NotplusminusContext *ctx);
+  void exitNotplusminus(AslParser::NotplusminusContext *ctx);
 
   // void enterEveryRule(antlr4::ParserRuleContext *ctx);
   // void exitEveryRule(antlr4::ParserRuleContext *ctx);

@@ -35,11 +35,14 @@ variable_decl
         : VAR ID (',' ID)* ':' type
         ;
 
-type    : ARRAY '[' expr ']' OF type
+type    : vect 
         | INT
         | BOOL
         | FLOAT
         | CHAR
+        ;
+
+vect    : ARRAY '[' expr ']' OF type
         ;
 
 statements
@@ -75,20 +78,21 @@ left_expr
         ;
 
 // Grammar for expressions with boolean, relational and aritmetic operators
-expr    : ident '[' expr ']'                      # array_read
-        | op=(NOT|PLUS|MINUS) expr             # notplusminus
-        | '(' expr ')'                         # par
-        | ident '(' ( |expr (',' expr)*) ')'      # call_func
-        | expr op=(MUL|DIV) expr               # arithmetic
-        | expr op=(PLUS|MINUS) expr            # arithmetic
-	      | expr op=(EQUAL|NE|GT|GE|LE|LT)  expr # relational
-	      | expr op=AND  expr		                 # logic
-	      | expr op=OR   expr		                 # logic
-//      | (INTVAL|FLOATVAL|CHARVAL)            # value
-        | INTVAL			                         # value		
-      	| FLOATVAL			                         # value
-       	| CHARVAL			                         # value
-        | ident                              # exprIdent
+expr    : ident '[' expr ']'                             # array_read
+        | op=(NOT|PLUS|MINUS) expr                       # notplusminus
+        | '(' expr ')'                                   # par
+        | ident '(' ( |expr (',' expr)*) ')'             # call_func
+        | expr op=(MUL|DIV) expr                         # arithmetic
+        | expr op=(PLUS|MINUS) expr                      # arithmetic
+        | expr op=(EQUAL|NE|GT|GE|LE|LT)  expr           # relational
+	| expr op=AND  expr		                 # logic
+	| expr op=OR   expr		                 # logic
+//      | (INTVAL|FLOATVAL|CHARVAL)                      # value
+        | INTVAL			                 # value		
+      	| FLOATVAL			                 # value
+       	| CHARVAL			                 # value
+        | BOOLVAL                                        # value
+        | ident                                          # exprIdent
         ;
 
 
@@ -139,11 +143,12 @@ FUNC      : 'func' ;
 ENDFUNC   : 'endfunc' ;
 READ      : 'read' ;
 WRITE     : 'write' ;
-ID        : ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')* ;
+BOOLVAL   : ('true'|'false');
 INTVAL    : ('0'..'9')+ ;
 FLOATVAL  : ('0'..'9')+ ( | ('.' ('0'..'9')+) );
-CHARVAL   : '\'' ~('\\'|'\'') '\'';                                     
-BOOLVAL   : ('true'|'false');
+CHARVAL   : '\'' ~('\\'|'\'') '\'';     
+ID        : ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')* ;                                
+
 
 // Strings (in quotes) with escape sequences
 STRING    : '"' ( ESC_SEQ | ~('\\'|'"') )* '"' ;

@@ -114,6 +114,19 @@ void SymbolsListener::exitType(AslParser::TypeContext *ctx) {
     TypesMgr::TypeId t = Types.createIntegerTy();
     putTypeDecor(ctx, t);
   }
+  else if(ctx->CHAR()){
+    TypesMgr::TypeId t = Types.createCharacterTy();
+    putTypeDecor(ctx, t);
+  }
+  else if(ctx->BOOL()){
+    TypesMgr::TypeId t = Types.createBooleanTy();
+    putTypeDecor(ctx, t);
+  }
+  
+  else if(ctx->FLOAT()){
+    TypesMgr::TypeId t = Types.createFloatTy();
+    putTypeDecor(ctx, t);
+  }
   DEBUG_EXIT();
 }
 
@@ -191,6 +204,22 @@ void SymbolsListener::enterValue(AslParser::ValueContext *ctx) {
   DEBUG_ENTER();
 }
 void SymbolsListener::exitValue(AslParser::ValueContext *ctx) {
+  TypesMgr::TypeId t = Types.createVoidTy();
+  if(ctx->INTVAL()){
+    t = Types.createIntegerTy();
+  }
+  else if(ctx->CHARVAL()){
+    t = Types.createCharacterTy();
+  }
+  else if(ctx->BOOLVAL()){
+    t = Types.createBooleanTy();
+  }
+  
+  else if(ctx->FLOATVAL()){
+    t = Types.createFloatTy();
+  }
+
+  putTypeDecor(ctx, t);
   DEBUG_EXIT();
 }
 
