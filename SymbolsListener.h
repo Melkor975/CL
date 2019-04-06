@@ -34,6 +34,9 @@ public:
   void enterFunction(AslParser::FunctionContext *ctx);
   void exitFunction(AslParser::FunctionContext *ctx);
 
+  void enterReturn_func(AslParser::Return_funcContext *ctx); 
+  void exitReturn_func(AslParser::Return_funcContext *ctx);
+
   void enterDeclarations(AslParser::DeclarationsContext *ctx);
   void exitDeclarations(AslParser::DeclarationsContext *ctx);
 

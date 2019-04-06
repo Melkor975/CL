@@ -141,6 +141,18 @@ void TypeCheckListener::exitIfStmt(AslParser::IfStmtContext *ctx) {
   DEBUG_EXIT();
 }
 
+
+  void TypeCheckListener::enterWhileStmt(AslParser::WhileStmtContext *ctx){
+    DEBUG_ENTER();
+  }
+  void TypeCheckListener::exitWhileStmt(AslParser::WhileStmtContext *ctx){
+    TypesMgr::TypeId t1 = getTypeDecor(ctx->expr());
+    if ((not Types.isErrorTy(t1)) and (not Types.isBooleanTy(t1)))
+      Errors.booleanRequired(ctx);
+    DEBUG_EXIT();
+  }
+
+
 void TypeCheckListener::enterProcCall(AslParser::ProcCallContext *ctx) {
   DEBUG_ENTER();
 }
@@ -149,6 +161,18 @@ void TypeCheckListener::exitProcCall(AslParser::ProcCallContext *ctx) {
   if (not Types.isFunctionTy(t1) and not Types.isErrorTy(t1)) {
     Errors.isNotCallable(ctx->ident());
   }
+  DEBUG_EXIT();
+}
+
+void TypeCheckListener::enterReturn_func(AslParser::Return_funcContext *ctx){
+  DEBUG_ENTER();
+}
+void TypeCheckListener::exitReturn_func(AslParser::Return_funcContext *ctx){
+  TypesMgr::TypeId t1 = getTypeDecor(ctx->ident());
+  if (not Types.isFunctionTy(t1) and not Types.isErrorTy(t1)) {
+    Errors.isNotFunction(ctx->ident());
+  }
+
   DEBUG_EXIT();
 }
 
@@ -187,11 +211,51 @@ void TypeCheckListener::enterLeft_expr(AslParser::Left_exprContext *ctx) {
 }
 void TypeCheckListener::exitLeft_expr(AslParser::Left_exprContext *ctx) {
   TypesMgr::TypeId t1 = getTypeDecor(ctx->ident());
+  if(ctx->expr()){
+    if(not Types.isErrorTy(t1) and not Types.isArrayTy(t1)){
+      Errors.nonArrayInArrayAccess(ctx->ident());
+    }
+    
+    TypesMgr::TypeId t2 = getTypeDecor(ctx->expr());
+    if(not Types.isErrorTy(t2) and not Types.isIntegerTy(t2)){
+      Errors.nonIntegerIndexInArrayAccess(ctx->expr());
+    }
+  
+  }
   putTypeDecor(ctx, t1);
   bool b = getIsLValueDecor(ctx->ident());
   putIsLValueDecor(ctx, b);
   DEBUG_EXIT();
 }
+
+
+
+void TypeCheckListener::enterArray_read(AslParser::Array_readContext *ctx){
+  DEBUG_ENTER();
+}
+void TypeCheckListener::exitArray_read(AslParser::Array_readContext *ctx){
+  TypesMgr::TypeId t1 = getTypeDecor(ctx->ident());
+  
+  if(not Types.isErrorTy(t1) and not Types.isArrayTy(t1)){
+    Errors.nonArrayInArrayAccess(ctx->ident());
+  }
+  
+  TypesMgr::TypeId t2 = getTypeDecor(ctx->expr());
+  if(not Types.isErrorTy(t2) and not Types.isIntegerTy(t2)){
+    Errors.nonIntegerIndexInArrayAccess(ctx->expr());
+  }
+  
+                                                                //ESTO ESTA MAL!!!! EL TIPO HA DE SER EL DE LA VARIABLE
+  putTypeDecor(ctx, t1);
+  bool b = getIsLValueDecor(ctx->ident());
+  putIsLValueDecor(ctx, b);
+  DEBUG_EXIT();
+}
+
+
+
+
+
 
 void TypeCheckListener::enterArithmetic(AslParser::ArithmeticContext *ctx) {
   DEBUG_ENTER();

@@ -17,7 +17,7 @@
 // #define DEBUG_BUILD
 #include "../common/debug.h"
 
-// using namespace std;
+using namespace std;
 
 
 // Constructor
@@ -127,6 +127,17 @@ void SymbolsListener::exitType(AslParser::TypeContext *ctx) {
     TypesMgr::TypeId t = Types.createFloatTy();
     putTypeDecor(ctx, t);
   }
+  else if(ctx->vect()){
+    unsigned int size = stoi(ctx->vect()->INTVAL()->getText());
+    TypesMgr::TypeId elemType = getTypeDecor(ctx->vect()->type());
+    if(Types.isArrayTy(elemType)){
+      cout << "Cuidado que intentas definir un array de mas de una dimension" << endl;
+    }
+    else {
+      TypesMgr::TypeId t = Types.createArrayTy(size, elemType);
+      putTypeDecor(ctx,t);
+    }
+  }
   DEBUG_EXIT();
 }
 
@@ -155,6 +166,13 @@ void SymbolsListener::enterProcCall(AslParser::ProcCallContext *ctx) {
   DEBUG_ENTER();
 }
 void SymbolsListener::exitProcCall(AslParser::ProcCallContext *ctx) {
+  DEBUG_EXIT();
+}
+
+void SymbolsListener::enterReturn_func(AslParser::Return_funcContext *ctx){
+  DEBUG_ENTER();
+}
+void SymbolsListener::exitReturn_func(AslParser::Return_funcContext *ctx){
   DEBUG_EXIT();
 }
 
@@ -204,22 +222,7 @@ void SymbolsListener::enterValue(AslParser::ValueContext *ctx) {
   DEBUG_ENTER();
 }
 void SymbolsListener::exitValue(AslParser::ValueContext *ctx) {
-  TypesMgr::TypeId t = Types.createVoidTy();
-  if(ctx->INTVAL()){
-    t = Types.createIntegerTy();
-  }
-  else if(ctx->CHARVAL()){
-    t = Types.createCharacterTy();
-  }
-  else if(ctx->BOOLVAL()){
-    t = Types.createBooleanTy();
-  }
-  
-  else if(ctx->FLOATVAL()){
-    t = Types.createFloatTy();
-  }
 
-  putTypeDecor(ctx, t);
   DEBUG_EXIT();
 }
 

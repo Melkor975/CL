@@ -42,7 +42,7 @@ type    : vect
         | CHAR
         ;
 
-vect    : ARRAY '[' expr ']' OF type
+vect    : ARRAY '[' INTVAL ']' OF type
         ;
 
 statements
@@ -81,7 +81,7 @@ left_expr
 expr    : ident '[' expr ']'                             # array_read
         | op=(NOT|PLUS|MINUS) expr                       # notplusminus
         | '(' expr ')'                                   # par
-        | ident '(' ( |expr (',' expr)*) ')'             # call_func
+        | ident '(' ( |expr (',' expr)*) ')'             # return_func  
         | expr op=(MUL|DIV) expr                         # arithmetic
         | expr op=(PLUS|MINUS) expr                      # arithmetic
         | expr op=(EQUAL|NE|GT|GE|LE|LT)  expr           # relational
