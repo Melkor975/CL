@@ -10,7 +10,7 @@ program : function+ EOF
 
 // A function has a name, a list of parameters and a list of statements
 function
-        : (FUNC ID '(' (|parameter_decl) ')' (|return_type) declarations statements ENDFUNC)
+        : (FUNC ID '(' ( |parameter_decl) ')' (|return_type) declarations statements ENDFUNC)
         //: FUNC ID '(' ')' declarations statements ENDFUNC
         ;
 
@@ -52,23 +52,23 @@ statements
 // The different types of instructions
 statement
           // Assignment Not Logical
-        : left_expr ASSIGN expr ';'           # assignStmt
+        : left_expr ASSIGN expr ';'                                 # assignStmt
           //crida void function
-        //| ID '(' ( |expr (',' expr)*) ')' ';' #func_Stmt
+        //| ID '(' ( |expr (',' expr)*) ')' ';'                     # func_Stmt
           // Return
-        | 'return' (|expr) ';'                # return
+        | 'return' (|expr) ';'                                      # return
           //WHILE
-        | WHILE expr DO statements ENDWHILE   #whileStmt
+        | WHILE expr DO statements ENDWHILE                         # whileStmt
           // if-then-else statement (else is optional)
-        | IF expr THEN statements (|ELSE) ENDIF       # ifStmt
+        | IF expr THEN statements (|ELSE) ENDIF                     # ifStmt
           // A function/procedure call has a list of arguments in parenthesis (possibly empty)
-        | ident '(' ')' ';'                   # procCall
+        | ident '(' ( |expr (',' expr)*) ')' ';'                    # procCall
           // Read a variable
-        | READ left_expr ';'                  # readStmt
+        | READ left_expr ';'                                        # readStmt
           // Write an expression
-        | WRITE expr ';'                      # writeExpr
+        | WRITE expr ';'                                            # writeExpr
           // Write a string
-        | WRITE STRING ';'                    # writeString
+        | WRITE STRING ';'                                          # writeString
         ;
 
         
@@ -85,12 +85,12 @@ expr    : ident '[' expr ']'                             # array_read
         | expr op=(MUL|DIV) expr                         # arithmetic
         | expr op=(PLUS|MINUS) expr                      # arithmetic
         | expr op=(EQUAL|NE|GT|GE|LE|LT)  expr           # relational
-	| expr op=AND  expr		                 # logic
-	| expr op=OR   expr		                 # logic
+	| expr op=AND  expr		                             # logic
+	| expr op=OR   expr		                             # logic
 //      | (INTVAL|FLOATVAL|CHARVAL)                      # value
-        | INTVAL			                 # value		
-      	| FLOATVAL			                 # value
-       	| CHARVAL			                 # value
+        | INTVAL			                             # value		
+      	| FLOATVAL			                             # value
+       	| CHARVAL			                             # value
         | BOOLVAL                                        # value
         | ident                                          # exprIdent
         ;

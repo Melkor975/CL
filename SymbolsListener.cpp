@@ -57,7 +57,15 @@ void SymbolsListener::exitFunction(AslParser::FunctionContext *ctx) {
   }
   else {
     std::vector<TypesMgr::TypeId> lParamsTy;
+		if(ctx -> parameter_decl()){
+			for(auto i: ctx -> parameter_decl()->pdObj()){
+				lParamsTy.push_back(getTypeDecor(i));
+			}
+		}
     TypesMgr::TypeId tRet = Types.createVoidTy();
+		if(ctx->return_type()) tRet = getTypeDecor(ctx->return_type()); 
+		
+		
     TypesMgr::TypeId tFunc = Types.createFunctionTy(lParamsTy, tRet);
     Symbols.addFunction(ident, tFunc);
   }
@@ -82,7 +90,7 @@ void SymbolsListener::exitDeclarations(AslParser::DeclarationsContext *ctx) {
 	  }
     else{
       TypesMgr::TypeId t1 = getTypeDecor(ipdObj->type());
-	    Symbols.addLocalVar(ident, t1);
+	    Symbols.addParameter(ident, t1);
     }
    }
    DEBUG_EXIT();
