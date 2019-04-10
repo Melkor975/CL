@@ -156,21 +156,26 @@ void TypeCheckListener::enterProcCall(AslParser::ProcCallContext *ctx) {
 }
 void TypeCheckListener::exitProcCall(AslParser::ProcCallContext *ctx) {
   TypesMgr::TypeId t1 = getTypeDecor(ctx->ident());
-  if (not Types.isFunctionTy(t1) and not Types.isErrorTy(t1)) {
+  
+  if(Types.isFunctionTy(t1)){
+    TypesMgr::TypeId return_ty = Types.getFuncReturnType(t1);
+    //assert(Types.isVoidTy(return_ty));
+    if(not Types.isVoidTy(return_ty)){
+    	Errors.isNotProcedure(ctx->ident());
+    }
+    int numParams = Types.getNumOfParameters(t1);
+    int comptadorParams = 0;  
+    if(ctx->expr(0)){
+      for(auto i:ctx->expr()) comptadorParams++;
+    }
+    if(comptadorParams != numParams){
+    		Errors.numberOfParameters(ctx->ident());
+    }
+    
+  }
+  else if (not Types.isFunctionTy(t1) and not Types.isErrorTy(t1)) { //treure la primera comprovacio, pero es per recordar el que fa
     Errors.isNotCallable(ctx->ident());
   }
-	TypesMgr::TypeId return_ty = Types.getFuncReturnType(t1);
-	if(not Types.isVoidTy(return_ty)){
-		Errors.isNotProcedure(ctx->ident());
-	}
-	int numParams = Types.getNumOfParameters(t1);
-	int comptadorParams = 0;  
-	if(ctx->expr(0)){
-		for(auto i:ctx->expr()) comptadorParams++;
-	}
-	if(comptadorParams != numParams){
-			Errors.numberOfParameters(ctx->ident());
-		}
 	
   DEBUG_EXIT();
 }
