@@ -26,4 +26,5 @@ _deps
 .git/
 main.o
 SymbolsListener.o
+.vscode
 TypeCheckListener.o
