@@ -59,7 +59,7 @@ void SymbolsListener::exitFunction(AslParser::FunctionContext *ctx) {
     std::vector<TypesMgr::TypeId> lParamsTy;
 		if(ctx -> parameter_decl()){
 			for(auto i: ctx -> parameter_decl()->pdObj()){
-				lParamsTy.push_back(getTypeDecor(i));
+				lParamsTy.push_back(getTypeDecor(i->type()));
 			}
 		}
     TypesMgr::TypeId tRet = Types.createVoidTy();

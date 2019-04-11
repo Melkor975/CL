@@ -171,7 +171,18 @@ void TypeCheckListener::exitProcCall(AslParser::ProcCallContext *ctx) {
     if(comptadorParams != numParams){
     		Errors.numberOfParameters(ctx->ident());
     }
-    
+    else{
+      vector<TypesMgr::TypeId> param_types = Types.getFuncParamsTypes(t1);
+
+      bool segueix = true;
+      for(int i = 0; i < Types.getNumOfParameters(t1)  and segueix; i++){
+        if(not Types.equalTypes(param_types[i] , getTypeDecor(ctx->expr(i)))){
+          segueix = false;
+          Errors.incompatibleParameter(ctx->expr(i), i+1, ctx->ident());
+        }
+      }
+
+    }
   }
   else if (not Types.isFunctionTy(t1) and not Types.isErrorTy(t1)) { //treure la primera comprovacio, pero es per recordar el que fa
     Errors.isNotCallable(ctx->ident());
@@ -184,12 +195,46 @@ void TypeCheckListener::enterReturn_func(AslParser::Return_funcContext *ctx){
   DEBUG_ENTER();
 }
 void TypeCheckListener::exitReturn_func(AslParser::Return_funcContext *ctx){
-  TypesMgr::TypeId t1 = getTypeDecor(ctx->ident());
-	
-  if (not Types.isFunctionTy(t1) and not Types.isErrorTy(t1)) {
-    Errors.isNotFunction(ctx->ident());
+TypesMgr::TypeId t1 = getTypeDecor(ctx->ident());
+  
+  if(Types.isFunctionTy(t1)){
+    TypesMgr::TypeId return_ty = Types.getFuncReturnType(t1);
+    //assert(Types.isVoidTy(return_ty));
+    if(Types.isVoidTy(return_ty)){
+    	Errors.isNotFunction(ctx->ident());
+    }
+
+    //AQUI SHA DE COMRPOVAR ELS TYPE DEL RETURN???????????????????????????
+    //if(not Types.equalTypes(return_ty))
+      putTypeDecor(ctx, return_ty);
+      bool b = getIsLValueDecor(ctx->ident());
+      putIsLValueDecor(ctx, b);
+
+
+    int numParams = Types.getNumOfParameters(t1);
+    int comptadorParams = 0;  
+    if(ctx->expr(0)){
+      for(auto i:ctx->expr()) comptadorParams++;
+    }
+    if(comptadorParams != numParams){
+    		Errors.numberOfParameters(ctx->ident());
+    }
+    else{
+      vector<TypesMgr::TypeId> param_types = Types.getFuncParamsTypes(t1);
+      bool segueix = true;
+      for(int i = 0; i < Types.getNumOfParameters(t1)  and segueix; i++){
+        if(not Types.equalTypes(param_types[i] , getTypeDecor(ctx->expr(i)))){
+          segueix = false;
+          Errors.incompatibleParameter(ctx->expr(i), i+1, ctx->ident());
+        }
+      }
+
+    }
   }
-	
+  else if (not Types.isFunctionTy(t1) and not Types.isErrorTy(t1)) { //treure la primera comprovacio, pero es per recordar el que fa
+    Errors.isNotCallable(ctx->ident());
+  }
+
   DEBUG_EXIT();
 }
 
