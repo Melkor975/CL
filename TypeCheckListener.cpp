@@ -124,7 +124,7 @@ void TypeCheckListener::exitAssignStmt(AslParser::AssignStmtContext *ctx) {
 
   if ((not Types.isErrorTy(t1)) and (not getIsLValueDecor(ctx->left_expr())))
     Errors.nonReferenceableLeftExpr(ctx->left_expr());
-
+  
 	
   DEBUG_EXIT();
 }
@@ -160,9 +160,10 @@ void TypeCheckListener::exitProcCall(AslParser::ProcCallContext *ctx) {
   if(Types.isFunctionTy(t1)){
     TypesMgr::TypeId return_ty = Types.getFuncReturnType(t1);
     //assert(Types.isVoidTy(return_ty));
-    if(not Types.isVoidTy(return_ty)){
-    	Errors.isNotProcedure(ctx->ident());
-    }
+    //if(not Types.isVoidTy(return_ty)){
+    //	Errors.isNotProcedure(ctx->ident());
+    //}
+    
     int numParams = Types.getNumOfParameters(t1);
     int comptadorParams = 0;  
     if(ctx->expr(0)){
