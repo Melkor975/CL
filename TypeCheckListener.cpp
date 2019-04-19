@@ -118,9 +118,10 @@ void TypeCheckListener::exitAssignStmt(AslParser::AssignStmtContext *ctx) {
   TypesMgr::TypeId t2 = getTypeDecor(ctx->expr());
 
   if ((not Types.isErrorTy(t1)) and (not Types.isErrorTy(t2)) and
-      (not Types.copyableTypes(t1, t2))) {
+      (not Types.copyableTypes(t1, t2)) ) {
     Errors.incompatibleAssignment(ctx->ASSIGN());
   }
+
 
   if ((not Types.isErrorTy(t1)) and (not getIsLValueDecor(ctx->left_expr())))
     Errors.nonReferenceableLeftExpr(ctx->left_expr());
@@ -197,44 +198,49 @@ void TypeCheckListener::enterReturn_func(AslParser::Return_funcContext *ctx){
 }
 void TypeCheckListener::exitReturn_func(AslParser::Return_funcContext *ctx){
 TypesMgr::TypeId t1 = getTypeDecor(ctx->ident());
-  
+TypesMgr::TypeId tAux = Types.createErrorTy();
   if(Types.isFunctionTy(t1)){
     TypesMgr::TypeId return_ty = Types.getFuncReturnType(t1);
     //assert(Types.isVoidTy(return_ty));
     if(Types.isVoidTy(return_ty)){
     	Errors.isNotFunction(ctx->ident());
     }
-
     //AQUI SHA DE COMRPOVAR ELS TYPE DEL RETURN???????????????????????????
     //if(not Types.equalTypes(return_ty))
-      putTypeDecor(ctx, return_ty);
-      bool b = getIsLValueDecor(ctx->ident());
-      putIsLValueDecor(ctx, b);
+      
 
-
-    int numParams = Types.getNumOfParameters(t1);
-    int comptadorParams = 0;  
-    if(ctx->expr(0)){
-      for(auto i:ctx->expr()) comptadorParams++;
-    }
-    if(comptadorParams != numParams){
-    		Errors.numberOfParameters(ctx->ident());
-    }
     else{
-      vector<TypesMgr::TypeId> param_types = Types.getFuncParamsTypes(t1);
-      bool segueix = true;
-      for(int i = 0; i < Types.getNumOfParameters(t1)  and segueix; i++){
-        if(not Types.equalTypes(param_types[i] , getTypeDecor(ctx->expr(i)))){
-          segueix = false;
-          Errors.incompatibleParameter(ctx->expr(i), i+1, ctx->ident());
-        }
+      int numParams = Types.getNumOfParameters(t1);
+      int comptadorParams = 0;  
+      if(ctx->expr(0)){
+        for(auto i:ctx->expr()) comptadorParams++;
       }
+      if(comptadorParams != numParams){
+          Errors.numberOfParameters(ctx->ident());
+      }
+      else{
+        vector<TypesMgr::TypeId> param_types = Types.getFuncParamsTypes(t1);
+        bool segueix = true;
+        for(int i = 0; i < Types.getNumOfParameters(t1)  and segueix; i++){
+          if(not Types.equalTypes(param_types[i] , getTypeDecor(ctx->expr(i)))){
+            segueix = false;
+            Errors.incompatibleParameter(ctx->expr(i), i+1, ctx->ident());
+          }
+        }
+        if(segueix){
+          //putTypeDecor(ctx, return_ty);
+          tAux = return_ty;
+        }
 
+      }
     }
   }
   else if (not Types.isFunctionTy(t1) and not Types.isErrorTy(t1)) { //treure la primera comprovacio, pero es per recordar el que fa
     Errors.isNotCallable(ctx->ident());
   }
+  bool b = getIsLValueDecor(ctx->ident());
+  putIsLValueDecor(ctx, b);
+  putTypeDecor(ctx, tAux);
 
   DEBUG_EXIT();
 }
@@ -274,18 +280,30 @@ void TypeCheckListener::enterLeft_expr(AslParser::Left_exprContext *ctx) {
 }
 void TypeCheckListener::exitLeft_expr(AslParser::Left_exprContext *ctx) {
   TypesMgr::TypeId t1 = getTypeDecor(ctx->ident());
+  TypesMgr::TypeId tRes = Types.createErrorTy();
   if(ctx->expr()){
+    bool estaBe = true;
     if(not Types.isErrorTy(t1) and not Types.isArrayTy(t1)){
       Errors.nonArrayInArrayAccess(ctx->ident());
+      estaBe = false;
     }
     
     TypesMgr::TypeId t2 = getTypeDecor(ctx->expr());
     if(not Types.isErrorTy(t2) and not Types.isIntegerTy(t2)){
       Errors.nonIntegerIndexInArrayAccess(ctx->expr());
+      estaBe = false;
+    }
+    
+    if(estaBe){
+      tRes = Types.getArrayElemType(t1);
     }
   
   }
-  putTypeDecor(ctx, t1);
+  else {
+    tRes = t1;
+  }
+
+  putTypeDecor(ctx, tRes);
   bool b = getIsLValueDecor(ctx->ident());
   putIsLValueDecor(ctx, b);
   DEBUG_EXIT();
@@ -298,18 +316,22 @@ void TypeCheckListener::enterArray_read(AslParser::Array_readContext *ctx){
 }
 void TypeCheckListener::exitArray_read(AslParser::Array_readContext *ctx){
   TypesMgr::TypeId t1 = getTypeDecor(ctx->ident());
-  
+  TypesMgr::TypeId tRes = Types.createErrorTy();
+
+  bool estaBe = true;
+
   if(not Types.isErrorTy(t1) and not Types.isArrayTy(t1)){
     Errors.nonArrayInArrayAccess(ctx->ident());
+    estaBe = false;
   }
   
   TypesMgr::TypeId t2 = getTypeDecor(ctx->expr());
   if(not Types.isErrorTy(t2) and not Types.isIntegerTy(t2)){
     Errors.nonIntegerIndexInArrayAccess(ctx->expr());
+    estaBe = false;
   }
-  
-                                                                //ESTO ESTA MAL!!!! EL TIPO HA DE SER EL DE LA VARIABLE
-  putTypeDecor(ctx, t1);
+  if(estaBe) tRes = Types.getArrayElemType(t1);
+  putTypeDecor(ctx, tRes);
   bool b = getIsLValueDecor(ctx->ident());
   putIsLValueDecor(ctx, b);
   DEBUG_EXIT();
