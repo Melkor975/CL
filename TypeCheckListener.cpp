@@ -253,17 +253,14 @@ TypesMgr::TypeId tAux = Types.createErrorTy();
       }
       else{
         vector<TypesMgr::TypeId> param_types = Types.getFuncParamsTypes(t1);
-        bool segueix = true;
-        for(int i = 0; i < Types.getNumOfParameters(t1)  and segueix; i++){
+       
+        for(int i = 0; i < Types.getNumOfParameters(t1); i++){
           if(not Types.equalTypes(param_types[i] , getTypeDecor(ctx->expr(i)))){
-            segueix = false;
             Errors.incompatibleParameter(ctx->expr(i), i+1, ctx->ident());
           }
         }
-        if(segueix){
-          //putTypeDecor(ctx, return_ty);
           tAux = return_ty;
-        }
+        
 
       }
     }
@@ -314,6 +311,8 @@ void TypeCheckListener::enterLeft_expr(AslParser::Left_exprContext *ctx) {
 void TypeCheckListener::exitLeft_expr(AslParser::Left_exprContext *ctx) {
   TypesMgr::TypeId t1 = getTypeDecor(ctx->ident());
   TypesMgr::TypeId tRes = Types.createErrorTy();
+  //cout << not Types.isErrorTy(t1) << endl;
+  
   if(ctx->expr()){
     bool estaBe = true;
     if(not Types.isErrorTy(t1) and not Types.isArrayTy(t1)){
@@ -327,7 +326,7 @@ void TypeCheckListener::exitLeft_expr(AslParser::Left_exprContext *ctx) {
       estaBe = false;
     }
     
-    if(estaBe){
+    if(estaBe and not Types.isErrorTy(t1)){
       tRes = Types.getArrayElemType(t1);
     }
   
@@ -335,6 +334,7 @@ void TypeCheckListener::exitLeft_expr(AslParser::Left_exprContext *ctx) {
   else {
     tRes = t1;
   }
+  
 
   putTypeDecor(ctx, tRes);
   bool b = getIsLValueDecor(ctx->ident());
@@ -363,7 +363,7 @@ void TypeCheckListener::exitArray_read(AslParser::Array_readContext *ctx){
     Errors.nonIntegerIndexInArrayAccess(ctx->expr());
     estaBe = false;
   }
-  if(estaBe) tRes = Types.getArrayElemType(t1);
+  if(estaBe and not Types.isErrorTy(t1)) tRes = Types.getArrayElemType(t1);
   putTypeDecor(ctx, tRes);
   bool b = getIsLValueDecor(ctx->ident());
   putIsLValueDecor(ctx, b);
