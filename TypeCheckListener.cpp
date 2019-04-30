@@ -74,12 +74,20 @@ void TypeCheckListener::enterFunction(AslParser::FunctionContext *ctx) {
   DEBUG_ENTER();
   SymTable::ScopeId sc = getScopeDecor(ctx);
   Symbols.pushThisScope(sc);
+  
+  TypesMgr::TypeId tRet = Types.createVoidTy();
+  if(ctx->return_type()){
+    tRet = getTypeDecor(ctx->return_type()->type());
+  }
+  Symbols.setCurrentFunctionTy(tRet);
   // Symbols.print();
 }
 void TypeCheckListener::exitFunction(AslParser::FunctionContext *ctx) {
   Symbols.popScope();
   DEBUG_EXIT();
 }
+
+
 
 void TypeCheckListener::enterDeclarations(AslParser::DeclarationsContext *ctx) {
   DEBUG_ENTER();
@@ -128,6 +136,31 @@ void TypeCheckListener::exitAssignStmt(AslParser::AssignStmtContext *ctx) {
   
 	
   DEBUG_EXIT();
+}
+
+void TypeCheckListener::enterReturn(AslParser::ReturnContext *ctx){
+  DEBUG_ENTER();
+}
+void TypeCheckListener::exitReturn(AslParser::ReturnContext *ctx){
+  DEBUG_EXIT();
+
+  if(ctx -> expr()){
+    TypesMgr::TypeId t = getTypeDecor(ctx->expr());
+    if(not Types.isErrorTy(t) and not Types.isPrimitiveNonVoidTy(t)){
+      Errors.incompatibleReturn(ctx->RETURN());
+    }
+    else if(not Types.isErrorTy(t) and not Types.equalTypes(t, Symbols.getCurrentFunctionTy())){
+      if(not Types.copyableTypes( Symbols.getCurrentFunctionTy(),t))
+        Errors.incompatibleReturn(ctx->RETURN());
+    }
+
+  }
+  else{
+    if(not Types.isVoidTy(Symbols.getCurrentFunctionTy())){
+      Errors.incompatibleReturn(ctx->RETURN());
+    }
+  }
+
 }
 
 void TypeCheckListener::enterIfStmt(AslParser::IfStmtContext *ctx) {

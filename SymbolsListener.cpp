@@ -65,7 +65,7 @@ void SymbolsListener::exitFunction(AslParser::FunctionContext *ctx) {
     TypesMgr::TypeId tRet = Types.createVoidTy();
 		if(ctx->return_type()) tRet = getTypeDecor(ctx->return_type()->type()); 
 		
-		
+		//
     TypesMgr::TypeId tFunc = Types.createFunctionTy(lParamsTy, tRet);
     Symbols.addFunction(ident, tFunc);
   }

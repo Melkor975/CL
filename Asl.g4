@@ -56,7 +56,7 @@ statement
           //crida void function
         //| ID '(' ( |expr (',' expr)*) ')' ';'                     # func_Stmt
           // Return
-        | 'return' (|expr) ';'                                      # return
+        | RETURN (|expr) ';'                                      # return
           //WHILE
         | WHILE expr DO statements ENDWHILE                         # whileStmt
           // if-then-else statement (else is optional)
@@ -139,6 +139,7 @@ WHILE     : 'while';
 DO        : 'do' ;
 ENDWHILE  : 'endwhile';
 
+RETURN    : 'return';
 FUNC      : 'func' ;
 ENDFUNC   : 'endfunc' ;
 READ      : 'read' ;

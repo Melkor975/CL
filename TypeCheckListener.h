@@ -68,6 +68,9 @@ public:
   void enterReturn_func(AslParser::Return_funcContext *ctx); 
   void exitReturn_func(AslParser::Return_funcContext *ctx);
 
+  void enterReturn(AslParser::ReturnContext *ctx);
+  void exitReturn(AslParser::ReturnContext *ctx);
+
   void enterDeclarations(AslParser::DeclarationsContext *ctx);
   void exitDeclarations(AslParser::DeclarationsContext *ctx);
 
