@@ -85,12 +85,12 @@ expr    : ident '[' expr ']'                             # array_read
         | expr op=(MUL|DIV) expr                         # arithmetic
         | expr op=(PLUS|MINUS) expr                      # arithmetic
         | expr op=(EQUAL|NE|GT|GE|LE|LT)  expr           # relational
-	| expr op=AND  expr		                             # logic
-	| expr op=OR   expr		                             # logic
+	| expr op=AND  expr		                 # logic
+	| expr op=OR   expr		                 # logic
 //      | (INTVAL|FLOATVAL|CHARVAL)                      # value
-        | INTVAL			                             # value		
-      	| FLOATVAL			                             # value
-       	| CHARVAL			                             # value
+        | INTVAL			                 # value		
+      	| FLOATVAL			                 # value
+       	| CHARVAL			                 # value
         | BOOLVAL                                        # value
         | ident                                          # exprIdent
         ;
