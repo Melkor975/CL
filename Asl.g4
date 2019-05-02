@@ -60,7 +60,7 @@ statement
           //WHILE
         | WHILE expr DO statements ENDWHILE                         # whileStmt
           // if-then-else statement (else is optional)
-        | IF expr THEN statements (|ELSE) ENDIF                     # ifStmt
+        | IF expr THEN statements (ELSE statements)? ENDIF                     # ifStmt
           // A function/procedure call has a list of arguments in parenthesis (possibly empty)
         | ident '(' ( |expr (',' expr)*) ')' ';'                    # procCall
           // Read a variable

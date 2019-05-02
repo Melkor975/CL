@@ -80,6 +80,9 @@ public:
   void enterType(AslParser::TypeContext *ctx);
   void exitType(AslParser::TypeContext *ctx);
 
+  void enterPar(AslParser::ParContext *ctx);
+  void exitPar(AslParser::ParContext *ctx);
+
   void enterStatements(AslParser::StatementsContext *ctx);
   void exitStatements(AslParser::StatementsContext *ctx);
 
