@@ -209,10 +209,8 @@ void TypeCheckListener::exitProcCall(AslParser::ProcCallContext *ctx) {
     else{
       vector<TypesMgr::TypeId> param_types = Types.getFuncParamsTypes(t1);
 
-      bool segueix = true;
-      for(int i = 0; i < Types.getNumOfParameters(t1)  and segueix; i++){
-        if(not Types.equalTypes(param_types[i] , getTypeDecor(ctx->expr(i)))){
-          segueix = false;
+      for(int i = 0; i < Types.getNumOfParameters(t1); i++){
+        if(not Types.equalTypes(param_types[i] , getTypeDecor(ctx->expr(i)))){        
           Errors.incompatibleParameter(ctx->expr(i), i+1, ctx->ident());
         }
       }
@@ -234,37 +232,33 @@ TypesMgr::TypeId t1 = getTypeDecor(ctx->ident());
 TypesMgr::TypeId tAux = Types.createErrorTy();
   if(Types.isFunctionTy(t1)){
     TypesMgr::TypeId return_ty = Types.getFuncReturnType(t1);
-    //assert(Types.isVoidTy(return_ty));
+    
     if(Types.isVoidTy(return_ty)){
     	Errors.isNotFunction(ctx->ident());
     }
-    //AQUI SHA DE COMRPOVAR ELS TYPE DEL RETURN???????????????????????????
-    //if(not Types.equalTypes(return_ty))
-      
-
+    else tAux = return_ty;
+    
+    int numParams = Types.getNumOfParameters(t1);
+    int comptadorParams = 0;  
+    if(ctx->expr(0)){
+      for(auto i:ctx->expr()) comptadorParams++;
+    }
+    if(comptadorParams != numParams){
+        Errors.numberOfParameters(ctx->ident());
+    }
     else{
-      int numParams = Types.getNumOfParameters(t1);
-      int comptadorParams = 0;  
-      if(ctx->expr(0)){
-        for(auto i:ctx->expr()) comptadorParams++;
-      }
-      if(comptadorParams != numParams){
-          Errors.numberOfParameters(ctx->ident());
-      }
-      else{
-        vector<TypesMgr::TypeId> param_types = Types.getFuncParamsTypes(t1);
-       
-        for(int i = 0; i < Types.getNumOfParameters(t1); i++){
-          if(not Types.equalTypes(param_types[i] , getTypeDecor(ctx->expr(i)))){
-            if(not Types.copyableTypes(param_types[i] , getTypeDecor(ctx->expr(i))))
-              Errors.incompatibleParameter(ctx->expr(i), i+1, ctx->ident());
-          }
-        }
-          tAux = return_ty;
+      vector<TypesMgr::TypeId> param_types = Types.getFuncParamsTypes(t1);
+      
+      for(int i = 0; i < Types.getNumOfParameters(t1); i++){
+          cout << param_types[i] << endl;
+          cout << getTypeDecor(ctx->expr(i)) << endl;
+          if(not Types.copyableTypes(param_types[i] , getTypeDecor(ctx->expr(i))))
+            Errors.incompatibleParameter(ctx->expr(i), i+1, ctx->ident());
         
-
       }
     }
+    
+    
   }
   else if (not Types.isFunctionTy(t1) and not Types.isErrorTy(t1)) { //treure la primera comprovacio, pero es per recordar el que fa
     Errors.isNotCallable(ctx->ident());
@@ -382,13 +376,23 @@ void TypeCheckListener::enterArithmetic(AslParser::ArithmeticContext *ctx) {
 void TypeCheckListener::exitArithmetic(AslParser::ArithmeticContext *ctx) {
   TypesMgr::TypeId t1 = getTypeDecor(ctx->expr(0));
   TypesMgr::TypeId t2 = getTypeDecor(ctx->expr(1));
-  TypesMgr::TypeId t = Types.createVoidTy();
+  TypesMgr::TypeId t = Types.createIntegerTy();
+  if(Types.isFloatTy(t1) or Types.isFloatTy(t2)){
+        t = Types.createFloatTy();
+  }
+
   if (((not Types.isErrorTy(t1)) and (not Types.isNumericTy(t1))) or
       ((not Types.isErrorTy(t2)) and (not Types.isNumericTy(t2)))){
     Errors.incompatibleOperator(ctx->op);
   }
-
-  t = Types.createIntegerTy();
+  else {
+    if(ctx->MOD()){
+      if((not Types.isErrorTy(t1) and not Types.isIntegerTy(t1)) or (not Types.isErrorTy(t2) and not Types.isIntegerTy(t2))){
+        Errors.incompatibleOperator(ctx->op);
+      }
+      t = Types.createIntegerTy();
+    }
+  }
   putTypeDecor(ctx, t);
   putIsLValueDecor(ctx, false);
   DEBUG_EXIT();
@@ -400,15 +404,14 @@ void TypeCheckListener::enterRelational(AslParser::RelationalContext *ctx) {
 void TypeCheckListener::exitRelational(AslParser::RelationalContext *ctx) {
   TypesMgr::TypeId t1 = getTypeDecor(ctx->expr(0));
   TypesMgr::TypeId t2 = getTypeDecor(ctx->expr(1));
-  TypesMgr::TypeId t = Types.createVoidTy();
+  TypesMgr::TypeId t = Types.createBooleanTy();
   std::string oper = ctx->op->getText();
   if ((not Types.isErrorTy(t1)) and (not Types.isErrorTy(t2)) and
       (not Types.comparableTypes(t1, t2, oper))){
     Errors.incompatibleOperator(ctx->op);
   }
   
-  t = Types.createBooleanTy();
-  
+   
   putTypeDecor(ctx, t);
   putIsLValueDecor(ctx, false);
   DEBUG_EXIT();
