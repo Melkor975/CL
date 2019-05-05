@@ -471,10 +471,8 @@ void TypeCheckListener::exitLogic(AslParser::LogicContext * ctx){
   if ((not Types.isErrorTy(t1)) and (not Types.isErrorTy(t2)) and
       (not Types.equalTypes(t1, t2) or not Types.isBooleanTy(t1))){
         Errors.incompatibleOperator(ctx->op);
-        t = Types.createErrorTy();
   }
-  //else 
-   t = Types.createBooleanTy();
+  t = Types.createBooleanTy();
 
   putTypeDecor(ctx, t);
   putIsLValueDecor(ctx, false);
