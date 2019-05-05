@@ -199,7 +199,22 @@ void CodeGenListener::exitIfStmt(AslParser::IfStmtContext *ctx) {
   DEBUG_EXIT();
 }
 */
-
+void CodeGenListener::enterWhileStmt(AslParser::WhileStmtContext *ctx){
+  DEBUG_ENTER();
+}
+void CodeGenListener::exitWhileStmt(AslParser::WhileStmtContext *ctx){
+  instructionList   code;
+  std::string       addr1 = getAddrDecor(ctx->expr());
+  instructionList   code1 = getCodeDecor(ctx->expr());
+  instructionList   code2 = getCodeDecor(ctx->statements());
+  std::string       label = codeCounters.newLabelWHILE();
+  std::string labelEndWhile = "endwhile"+label;
+  std::string labelWhile = "while" + label;
+  code = instruction::LABEL(labelWhile) || code1 || instruction::FJUMP(addr1, labelEndWhile) ||
+        code2  || instruction::UJUMP(labelWhile) || instruction::LABEL(labelEndWhile);
+  putCodeDecor(ctx, code);
+  DEBUG_EXIT();
+}
 
 void CodeGenListener::enterProcCall(AslParser::ProcCallContext *ctx) {
   DEBUG_ENTER();
@@ -533,6 +548,7 @@ void CodeGenListener::exitRelational(AslParser::RelationalContext *ctx) {
       temp = "%"+codeCounters.newTEMP();
       code = code || instruction::LE(temp, addr1, addr2);
     }  
+    code = code || instruction::NOT(temp,temp);
   }
   else if(ctx->GE()){
     if(Types.isFloatTy(t)){
@@ -618,6 +634,12 @@ void CodeGenListener::exitValue(AslParser::ValueContext *ctx) {
   }
   else if(Types.isCharacterTy(t1)){
     code = instruction::CHLOAD(temp,ctx->getText());
+  }
+  else if(Types.isBooleanTy(t1)){
+    std::string boolVal = ctx->getText();
+    if(boolVal == "true") boolVal = "1";
+    else boolVal = "0";
+    code = instruction::LOAD(temp,boolVal);
   }
   putAddrDecor(ctx, temp);
   putOffsetDecor(ctx, "");
