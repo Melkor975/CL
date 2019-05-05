@@ -428,13 +428,32 @@ void TypeCheckListener::exitNotplusminus(AslParser::NotplusminusContext *ctx){
   if(ctx->NOT()){
     if((not Types.isErrorTy(t1)) and (not Types.isBooleanTy(t1))){
         Errors.booleanRequired(ctx->expr());
-        t = Types.createErrorTy();
+        //t = Types.createErrorTy();
     }
-    //else
      t = Types.createBooleanTy();
-    putTypeDecor(ctx, t);
-    putIsLValueDecor(ctx, false);
+    
   }
+  else if(ctx->PLUS()){
+    if(not Types.isErrorTy(t1) and not Types.isNumericTy(t1)){ 
+      Errors.incompatibleOperator(ctx->op);
+    }
+    t = Types.createIntegerTy();
+    if(Types.isFloatTy(t1)){
+      t = Types.createFloatTy();
+    }
+  }
+  else if(ctx->MINUS()){
+    if(not Types.isErrorTy(t1) and not Types.isNumericTy(t1)){ 
+      Errors.incompatibleOperator(ctx->op);
+    }
+    t = Types.createIntegerTy();
+    if(Types.isFloatTy(t1)){
+      t = Types.createFloatTy();
+    }
+
+  }
+  putTypeDecor(ctx, t);
+    putIsLValueDecor(ctx, false);
   DEBUG_EXIT();
 }
 
