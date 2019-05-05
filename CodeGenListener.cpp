@@ -98,9 +98,10 @@ void CodeGenListener::exitParameter_decl(AslParser::Parameter_declContext *ctx){
      subroutine       & subrRef = Code.get_last_subroutine();
      TypesMgr::TypeId        t1 = getTypeDecor(ipdObj->type());
      std::size_t           size = Types.getSizeOfType(t1);
-     subrRef.add_var(ipdObj->ID()->getText(), size);           //add_var ha de fer algo pero amb parametres
+     //subrRef.add_var(ipdObj->ID()->getText(), size);           //add_var ha de fer algo pero amb parametres
      subrRef.add_param(ipdObj->ID()->getText()); 
    }
+   
     DEBUG_EXIT();
 }
 

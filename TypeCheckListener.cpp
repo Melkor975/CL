@@ -250,8 +250,6 @@ TypesMgr::TypeId tAux = Types.createErrorTy();
       vector<TypesMgr::TypeId> param_types = Types.getFuncParamsTypes(t1);
       
       for(int i = 0; i < Types.getNumOfParameters(t1); i++){
-          cout << param_types[i] << endl;
-          cout << getTypeDecor(ctx->expr(i)) << endl;
           if(not Types.copyableTypes(param_types[i] , getTypeDecor(ctx->expr(i))))
             Errors.incompatibleParameter(ctx->expr(i), i+1, ctx->ident());
         
