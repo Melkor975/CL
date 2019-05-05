@@ -83,6 +83,12 @@ public:
   void enterPar(AslParser::ParContext *ctx);
   void exitPar(AslParser::ParContext *ctx);
 
+  void enterLogic(AslParser::LogicContext *ctx);
+  void exitLogic(AslParser::LogicContext *ctx);
+
+  void enterNotplusminus(AslParser::NotplusminusContext *ctx);
+  void exitNotplusminus(AslParser::NotplusminusContext *ctx);
+
   void enterStatements(AslParser::StatementsContext *ctx);
   void exitStatements(AslParser::StatementsContext *ctx);
 
