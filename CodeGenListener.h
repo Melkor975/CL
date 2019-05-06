@@ -104,6 +104,9 @@ public:
   void enterProcCall(AslParser::ProcCallContext *ctx);
   void exitProcCall(AslParser::ProcCallContext *ctx);
 
+  void enterReturn_func(AslParser::Return_funcContext *ctx);
+  void exitReturn_func(AslParser::Return_funcContext *ctx);
+
   void enterReadStmt(AslParser::ReadStmtContext *ctx);
   void exitReadStmt(AslParser::ReadStmtContext *ctx);
 
