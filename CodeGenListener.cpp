@@ -269,6 +269,25 @@ void CodeGenListener::exitReturn_func(AslParser::Return_funcContext *ctx){
   DEBUG_EXIT();
 }
 
+void CodeGenListener::enterReturn(AslParser::ReturnContext *ctx){
+  DEBUG_ENTER();
+}
+void CodeGenListener::exitReturn(AslParser::ReturnContext * ctx){
+  instructionList code;
+  std::string       addr1 = getAddrDecor(ctx->expr());
+  std::string temp;
+  if(ctx->expr()){
+    code = getCodeDecor(ctx->expr());
+    subroutine       & subrRef = Code.get_last_subroutine();
+    temp = (subrRef.params.begin()) -> name;
+    code = code || instruction::LOAD(temp, addr1) || instruction::RETURN();
+  }
+  putCodeDecor(ctx,code);
+  putOffsetDecor(ctx,"");
+  putAddrDecor(ctx,temp);
+  DEBUG_EXIT();
+}
+
 
 
 
