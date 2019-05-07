@@ -70,13 +70,16 @@ void CodeGenListener::enterFunction(AslParser::FunctionContext *ctx) {
   DEBUG_ENTER();
   subroutine subr(ctx->ID()->getText());
   Code.add_subroutine(subr);
+  //Aqui estem modificant els parametres per en cas de que retorni alguna cosa, afegeix la variable _result
+  subroutine & subrRef = Code.get_last_subroutine();
+  if(ctx->return_type()) subrRef.add_param("_result");
+  
   SymTable::ScopeId sc = getScopeDecor(ctx);
   Symbols.pushThisScope(sc);
   codeCounters.reset();
 }
 void CodeGenListener::exitFunction(AslParser::FunctionContext *ctx) {
   subroutine & subrRef = Code.get_last_subroutine();
-  //if(ctx->return_type()) subrRef.add_param("_result");
   instructionList code = getCodeDecor(ctx->statements());
   code = code || instruction::RETURN();
   subrRef.set_instructions(code);
@@ -96,7 +99,7 @@ void CodeGenListener::enterParameter_decl(AslParser::Parameter_declContext *ctx)
   DEBUG_ENTER();
 }
 void CodeGenListener::exitParameter_decl(AslParser::Parameter_declContext *ctx){
-     subroutine       & subrRef = Code.get_last_subroutine();
+   subroutine       & subrRef = Code.get_last_subroutine();
    for(auto ipdObj: ctx->pdObj()){
      //TypesMgr::TypeId        t1 = getTypeDecor(ipdObj->type());
      //std::size_t           size = Types.getSizeOfType(t1);
@@ -173,7 +176,7 @@ void CodeGenListener::exitIfStmt(AslParser::IfStmtContext *ctx) {
   std::string      label2 = codeCounters.newLabelIF();
   std::string      label3 = "else"+label2;
   std::string labelEndIf = "endif"+label2;
-  if(ctx->statements(1)){
+  if(ctx->ELSE()){
     instructionList  code3 = getCodeDecor(ctx->statements(1));
     code = code1 || instruction::FJUMP(addr1, label3) ||
          code2 || instruction::UJUMP(labelEndIf) || instruction::LABEL(label3)        ||
@@ -233,8 +236,7 @@ void CodeGenListener::exitProcCall(AslParser::ProcCallContext *ctx) {
   // std::string name = ctx->ident()->ID()->getSymbol()->getText();
   std::string name = ctx->ident()->getText();
   code = code || instruction::CALL(name);
-    for(auto p : ctx->expr()){
-
+  for(auto p : ctx->expr()){
     code = code || instruction::POP();
   }
   putCodeDecor(ctx, code);
