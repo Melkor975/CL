@@ -122,6 +122,9 @@ public:
   void enterLeft_expr(AslParser::Left_exprContext *ctx);
   void exitLeft_expr(AslParser::Left_exprContext *ctx);
 
+  void enterArray_read(AslParser::Array_readContext *ctx);
+  void exitArray_read(AslParser::Array_readContext * ctx);
+
   void enterArithmetic(AslParser::ArithmeticContext *ctx);
   void exitArithmetic(AslParser::ArithmeticContext *ctx);
 
