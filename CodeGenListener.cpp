@@ -286,9 +286,17 @@ void CodeGenListener::enterReturn_func(AslParser::Return_funcContext *ctx){
 }
 void CodeGenListener::exitReturn_func(AslParser::Return_funcContext *ctx){
   instructionList code;
-  
+  int i = 0;
   for(auto p : ctx->expr()){
     code = code || getCodeDecor(p);
+    std::vector<TypesMgr::TypeId> vecTy = Types.getFuncParamsTypes(getTypeDecor(ctx->ident()));
+    if(Types.isIntegerTy(getTypeDecor(p)) and Types.isFloatTy(vecTy[i])){
+      std::string tempF = "%"+codeCounters.newTEMP();
+      std::string addrE = getAddrDecor(p);
+      code = code || instruction::FLOAT(tempF,addrE);
+      putAddrDecor(p, tempF);
+    }
+    i++;
   }
   code = code || instruction::PUSH();
   for(auto p : ctx->expr()){
