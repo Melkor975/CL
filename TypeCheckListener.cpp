@@ -210,9 +210,9 @@ void TypeCheckListener::exitProcCall(AslParser::ProcCallContext *ctx) {
       vector<TypesMgr::TypeId> param_types = Types.getFuncParamsTypes(t1);
 
       for(int i = 0; i < Types.getNumOfParameters(t1); i++){
-        if(not Types.equalTypes(param_types[i] , getTypeDecor(ctx->expr(i)))){        
-          Errors.incompatibleParameter(ctx->expr(i), i+1, ctx->ident());
-        }
+          if(not Types.copyableTypes(param_types[i] , getTypeDecor(ctx->expr(i))))
+            Errors.incompatibleParameter(ctx->expr(i), i+1, ctx->ident());
+        
       }
 
     }
