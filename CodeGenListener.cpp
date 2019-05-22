@@ -191,21 +191,43 @@ void CodeGenListener::exitAssignStmt(AslParser::AssignStmtContext *ctx) {
 void CodeGenListener::enterArray_read(AslParser::Array_readContext *ctx){
   DEBUG_ENTER();
 }
-void CodeGenListener::exitArray_read(AslParser::Array_readContext * ctx){
-  instructionList code;
-  std::string addrA = getAddrDecor(ctx->ident());
-  instructionList codeE = getCodeDecor(ctx->expr());
-  std::string addrE = getAddrDecor(ctx->expr());
-   
-  std::string temp = "%"+codeCounters.newTEMP();
-  code = codeE || instruction::LOAD(temp, "1");
-  code = code || instruction::MUL(temp, addrE, temp);
 
-  code = code || instruction::LOADX(temp, addrA, temp);
-  
-  putCodeDecor(ctx, code);
-  putAddrDecor(ctx, temp);
-  putOffsetDecor(ctx, "");
+void CodeGenListener::exitArray_read(AslParser::Array_readContext * ctx){
+  if(Symbols.isLocalVarClass(ctx->ident()->getText())){
+    instructionList code;
+    std::string addrA = getAddrDecor(ctx->ident());
+    instructionList codeE = getCodeDecor(ctx->expr());
+    std::string addrE = getAddrDecor(ctx->expr());
+    
+    std::string temp = "%"+codeCounters.newTEMP();
+    code = codeE || instruction::LOAD(temp, "1");
+    code = code || instruction::MUL(temp, addrE, temp);
+
+    code = code || instruction::LOADX(temp, addrA, temp);
+    
+    putCodeDecor(ctx, code);
+    putAddrDecor(ctx, temp);
+    putOffsetDecor(ctx, "");
+  }
+  else{
+    instructionList code;
+    std::string tempRef = "%"+codeCounters.newTEMP();
+    
+    std::string addrA = getAddrDecor(ctx->ident());
+    code = code || instruction::LOAD(tempRef, addrA);
+
+    instructionList codeE = getCodeDecor(ctx->expr());
+    std::string addrE = getAddrDecor(ctx->expr());
+    
+    std::string temp = "%"+codeCounters.newTEMP();
+    code = code || codeE || instruction::LOAD(temp, "1");
+    code = code || instruction::MUL(temp, addrE, temp);
+
+    code = code || instruction::LOADX(temp, tempRef, temp);
+    putCodeDecor(ctx, code);
+    putAddrDecor(ctx, temp);
+    putOffsetDecor(ctx, "");
+  }
   DEBUG_EXIT();
 }
 
@@ -282,6 +304,12 @@ void CodeGenListener::exitProcCall(AslParser::ProcCallContext *ctx) {
       code = code || instruction::FLOAT(tempF,addrE);
       putAddrDecor(p, tempF);
     }
+    else if(Types.isArrayTy(getTypeDecor(p))){
+      std::string tempA = "%"+codeCounters.newTEMP();
+      std::string addrE = getAddrDecor(p);
+      code = code || instruction::ALOAD(tempA, addrE);
+      putAddrDecor(p, tempA);
+    }
     i++;
   }
   code = code || instruction::PUSH();
@@ -314,6 +342,12 @@ void CodeGenListener::exitReturn_func(AslParser::Return_funcContext *ctx){
       std::string addrE = getAddrDecor(p);
       code = code || instruction::FLOAT(tempF,addrE);
       putAddrDecor(p, tempF);
+    }
+     else if(Types.isArrayTy(getTypeDecor(p))){
+      std::string tempA = "%"+codeCounters.newTEMP();
+      std::string addrE = getAddrDecor(p);
+      code = code || instruction::ALOAD(tempA, addrE);
+      putAddrDecor(p, tempA);
     }
     i++;
   }
@@ -461,17 +495,35 @@ void CodeGenListener::enterLeft_expr(AslParser::Left_exprContext *ctx) {
 }
 void CodeGenListener::exitLeft_expr(AslParser::Left_exprContext *ctx) {
   if(ctx->expr()) { //Is Array
-    instructionList code;
-    code = code || getCodeDecor(ctx->expr());
-    std::string  addrExp = getAddrDecor(ctx->expr());
-    std::string temp = "%"+codeCounters.newTEMP();
+    if(Symbols.isLocalVarClass(ctx->ident()->getText())){
+      instructionList code;
+      code = code || getCodeDecor(ctx->expr());
+      std::string  addrExp = getAddrDecor(ctx->expr());
+      std::string temp = "%"+codeCounters.newTEMP();
 
-    code = code || instruction::LOAD(temp, "1");
+      code = code || instruction::LOAD(temp, "1");
+      
+      code = code || instruction::MUL(temp, addrExp, temp);
+      putOffsetDecor(ctx, temp);
+      putCodeDecor(ctx, code);
+      putAddrDecor(ctx, getAddrDecor(ctx->ident()));        //IDENT ARRAY
+    }
+    else {
+      instructionList code;
+      std::string tempRef = "%"+codeCounters.newTEMP();
+      code = code || instruction::LOAD(tempRef,getAddrDecor(ctx->ident()));
+      code = code || getCodeDecor(ctx->expr());
+      std::string  addrExp = getAddrDecor(ctx->expr());
+      std::string temp = "%"+codeCounters.newTEMP();
+
+      code = code || instruction::LOAD(temp, "1");
+      
+      code = code || instruction::MUL(temp, addrExp, temp);
+      putOffsetDecor(ctx, temp);
+      putCodeDecor(ctx, code);
+      putAddrDecor(ctx, tempRef);                           //INDICA EL NOM DE LA VARIABLE QUE FA REFERENCIA AL ARRAY
+    }
     
-    code = code || instruction::MUL(temp, addrExp, temp);
-    putOffsetDecor(ctx, temp);
-    putCodeDecor(ctx, code);
-    putAddrDecor(ctx, getAddrDecor(ctx->ident())); //CREC QUE AIXO NO ES FA SERVIR
   }
   else{
     putAddrDecor(ctx, getAddrDecor(ctx->ident()));
@@ -548,6 +600,9 @@ void CodeGenListener::exitArithmetic(AslParser::ArithmeticContext *ctx) {
     }
   }
   else if(ctx->MOD()){
+    std::string tempAux = "%"+codeCounters.newTEMP();
+    code = code || instruction::DIV(tempAux, addr1, addr2) || instruction::MUL(tempAux, tempAux, addr2) || instruction::SUB(tempAux, addr1, tempAux);
+    temp = tempAux;
     //code = code || instruction::
   }
   else if(ctx->PLUS()){

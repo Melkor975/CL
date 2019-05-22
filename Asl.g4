@@ -148,7 +148,8 @@ WRITE     : 'write' ;
 BOOLVAL   : ('true'|'false');
 INTVAL    : ('0'..'9')+ ;
 FLOATVAL  : ('0'..'9')+ ( | ('.' ('0'..'9')+) );
-CHARVAL   : '\'' ~('\\'|'\'') '\'';     
+//fragment NEWLINE : '\r' '\n' | '\n' | '\r';
+CHARVAL   : ('\'' ~('\\'|'\'') '\''); // | NEWLINE;     
 ID        : ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')* ;                                
 
 
