@@ -152,35 +152,40 @@ void CodeGenListener::enterAssignStmt(AslParser::AssignStmtContext *ctx) {
 void CodeGenListener::exitAssignStmt(AslParser::AssignStmtContext *ctx) {
   instructionList  code;
 
-  if(ctx->left_expr()->expr()){ //IS ARRAY
-    std::string     addrA = getAddrDecor(ctx->left_expr());
-    std::string     offsA = getOffsetDecor(ctx->left_expr());
-    instructionList code1 = getCodeDecor(ctx->left_expr());
+  TypesMgr::TypeId tid1 = getTypeDecor(ctx->left_expr());
+  std::string     addr1 = getAddrDecor(ctx->left_expr());
+  instructionList code1 = getCodeDecor(ctx->left_expr());
+  std::string resultat;
 
-    std::string     addrE = getAddrDecor(ctx->expr());
-    instructionList code2 = getCodeDecor(ctx->expr());
-
-    code = code1 || code2 || instruction::XLOAD(addrA, offsA, addrE);
+  TypesMgr::TypeId tid2 = getTypeDecor(ctx->expr());
+  std::string     addr2 = getAddrDecor(ctx->expr());
+  instructionList code2 = getCodeDecor(ctx->expr());
+ code = code1 || code2; 
+  if(Types.isFloatTy(tid1) and Types.isIntegerTy(tid2)){
+        std::string temp = "%"+codeCounters.newTEMP();
+        code = code || instruction::FLOAT(temp, addr2);
+        resultat = temp;
 
   }
   else{
-    std::string     addr1 = getAddrDecor(ctx->left_expr());
-    // std::string     offs1 = getOffsetDecor(ctx->left_expr());
-    instructionList code1 = getCodeDecor(ctx->left_expr());
-    TypesMgr::TypeId tid1 = getTypeDecor(ctx->left_expr());
-    TypesMgr::TypeId tid2 = getTypeDecor(ctx->expr());
-    std::string     addr2 = getAddrDecor(ctx->expr());
-    // std::string     offs2 = getOffsetDecor(ctx->expr());
-    instructionList code2 = getCodeDecor(ctx->expr());
-    code = code1 || code2;
-    if(Types.isFloatTy(tid1) and Types.isIntegerTy(tid2)){
-      std::string temp = "%"+codeCounters.newTEMP();
-      code = code || instruction::FLOAT(temp, addr2);
-      code = code || instruction::LOAD(addr1, temp);
+        resultat = addr2;
+  }     
+
+  
+  //AQUI resultat ja te el valor a escriure
+
+  if(ctx->left_expr()->expr()){                         
+    std::string     addrA = getAddrDecor(ctx->left_expr());                   //IS ARRAY
+    std::string     offsA = getOffsetDecor(ctx->left_expr());
+    code = code  || instruction::XLOAD(addrA, offsA, resultat);
+  }
+  else{
+    if(Types.isArrayTy(tid1) and Types.isArrayTy(tid2)){
+    
     }
     else{
-      code = code || instruction::LOAD(addr1, addr2);
-    }     
+      code = code ||  instruction::LOAD(addr1, resultat);                                                               //NO ES ASSIGNACIO DE ARRAYS    
+    }
   }
 
 
@@ -258,20 +263,6 @@ void CodeGenListener::exitIfStmt(AslParser::IfStmtContext *ctx) {
   DEBUG_EXIT();
 }
 
-/*
-void CodeGenListener::exitIfStmt(AslParser::IfStmtContext *ctx) {
-  instructionList   code;
-  std::string      addr1 = getAddrDecor(ctx->expr());
-  instructionList  code1 = getCodeDecor(ctx->expr());
-  instructionList  code2 = getCodeDecor(ctx->statements());
-  std::string      label = codeCounters.newLabelIF();
-  std::string labelEndIf = "endif"+label;
-  code = code1 || instruction::FJUMP(addr1, labelEndIf) ||
-         code2 || instruction::LABEL(labelEndIf);
-  putCodeDecor(ctx, code);
-  DEBUG_EXIT();
-}
-*/
 void CodeGenListener::enterWhileStmt(AslParser::WhileStmtContext *ctx){
   DEBUG_ENTER();
 }
@@ -444,40 +435,10 @@ void CodeGenListener::exitWriteExpr(AslParser::WriteExprContext *ctx) {
   if(Types.isFloatTy(tid1))
     code = code1 || instruction::WRITEF(addr1);
   else if(Types.isCharacterTy(tid1)){
-    code = code1 || instruction::WRITEC(addr1);
-    //std::string temp = "%"+codeCounters.newTEMP();
-    //std::string s = ctx->expr()->getText();
-    //code = code || instruction::CHLOAD(temp, s.substr(1, s.size()-2)) || instruction::WRITEC(temp);
-    
-/*    std::string temp = "%"+codeCounters.newTEMP();
-    if (s != '\\') {
-      code = code ||
-	     instruction::CHLOAD(temp, s.substr(i,1)) ||
-	     instruction::WRITEC(temp);
-      i += 1;
-    }
-    else {
-      assert(i < int(s.size())-2);
-      if (s[i+1] == 'n') {
-        code = code || instruction::WRITELN();
-        i += 2;
-      }
-      else if (s[i+1] == 't' or s[i+1] == '"' or s[i+1] == '\\') {
-        code = code ||
-               instruction::CHLOAD(temp, s.substr(i,2)) ||
-	       instruction::WRITEC(temp);
-        i += 2;
-      }
-      else {
-        code = code ||
-               instruction::CHLOAD(temp, s.substr(i,1)) ||
-	       instruction::WRITEC(temp);
-        i += 1;
-      }
-    }
-*/
-
-   
+    //code = code1 || instruction::WRITEC(addr1);
+    std::string temp = "%"+codeCounters.newTEMP();
+    std::string s = ctx->expr()->getText();
+    code = code || instruction::CHLOAD(temp, s.substr(1, s.size()-2)) || instruction::WRITEC(temp);   
   }
   else {
     code = code1 || instruction::WRITEI(addr1); //INT or BOOL
