@@ -445,8 +445,43 @@ void CodeGenListener::exitWriteExpr(AslParser::WriteExprContext *ctx) {
     code = code1 || instruction::WRITEF(addr1);
   else if(Types.isCharacterTy(tid1)){
     code = code1 || instruction::WRITEC(addr1);
+    //std::string temp = "%"+codeCounters.newTEMP();
+    //std::string s = ctx->expr()->getText();
+    //code = code || instruction::CHLOAD(temp, s.substr(1, s.size()-2)) || instruction::WRITEC(temp);
+    
+/*    std::string temp = "%"+codeCounters.newTEMP();
+    if (s != '\\') {
+      code = code ||
+	     instruction::CHLOAD(temp, s.substr(i,1)) ||
+	     instruction::WRITEC(temp);
+      i += 1;
+    }
+    else {
+      assert(i < int(s.size())-2);
+      if (s[i+1] == 'n') {
+        code = code || instruction::WRITELN();
+        i += 2;
+      }
+      else if (s[i+1] == 't' or s[i+1] == '"' or s[i+1] == '\\') {
+        code = code ||
+               instruction::CHLOAD(temp, s.substr(i,2)) ||
+	       instruction::WRITEC(temp);
+        i += 2;
+      }
+      else {
+        code = code ||
+               instruction::CHLOAD(temp, s.substr(i,1)) ||
+	       instruction::WRITEC(temp);
+        i += 1;
+      }
+    }
+*/
+
+   
   }
-  else code = code1 || instruction::WRITEI(addr1);
+  else {
+    code = code1 || instruction::WRITEI(addr1); //INT or BOOL
+  }
   putCodeDecor(ctx, code);
   DEBUG_EXIT();
 }
