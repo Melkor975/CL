@@ -160,7 +160,7 @@ void CodeGenListener::exitAssignStmt(AslParser::AssignStmtContext *ctx) {
   TypesMgr::TypeId tid2 = getTypeDecor(ctx->expr());
   std::string     addr2 = getAddrDecor(ctx->expr());
   instructionList code2 = getCodeDecor(ctx->expr());
- code = code1 || code2; 
+  code = code1 || code2; 
   if(Types.isFloatTy(tid1) and Types.isIntegerTy(tid2)){
         std::string temp = "%"+codeCounters.newTEMP();
         code = code || instruction::FLOAT(temp, addr2);
@@ -171,17 +171,71 @@ void CodeGenListener::exitAssignStmt(AslParser::AssignStmtContext *ctx) {
         resultat = addr2;
   }     
 
-  
+
   //AQUI resultat ja te el valor a escriure
 
-  if(ctx->left_expr()->expr()){                         
-    std::string     addrA = getAddrDecor(ctx->left_expr());                   //IS ARRAY
+  if(ctx->left_expr()->expr()){                         //IS ARRAY
+    std::string     addrA = getAddrDecor(ctx->left_expr());                   
     std::string     offsA = getOffsetDecor(ctx->left_expr());
     code = code  || instruction::XLOAD(addrA, offsA, resultat);
   }
   else{
     if(Types.isArrayTy(tid1) and Types.isArrayTy(tid2)){
+       std::string       label = codeCounters.newLabelWHILE();
+       std::string labelEndWhile = "endwhile"+label;
+       std::string labelWhile = "while" + label;
+      std::string     adA = addr1;
+      std::string     adB = addr2;
+
+      std::string index = "%"+codeCounters.newTEMP();
+      std::string offset = "%"+codeCounters.newTEMP();
+      std::string midaA = "%"+codeCounters.newTEMP();
+      //si es vol fer el de float a int i ocupen diferent shauria de canviar aixo fent dos offset!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      code = code || instruction::LOAD(index, "0"); //i = 0
+      
+      code = code || instruction::LOAD(midaA, "1");       // AQUI DETETRMINEM LA MIDA DE LES POSIS DEL ARRAY
+
+      code = code || instruction::LABEL(labelWhile);
+
+      std::size_t numParametres = Types.getArraySize(tid1);     //TOT AIXO ES PEL TAMANY DELS VECTORS
+      int nP = static_cast<int>(numParametres);                 //amb un ja fem perque son de la mateixa mida
+      std::string strSizeA =  std::to_string(nP);               //
+      std::string sizeA = "%"+codeCounters.newTEMP();           //
+      code = code || instruction::LOAD(sizeA, strSizeA);        //
+
+      std::string condicio = "%"+codeCounters.newTEMP();
+      code = code || instruction::LT(condicio, index, sizeA);   // condicio = i < A.size() 
+      code = code || instruction::FJUMP(condicio, labelEndWhile); // Salta si i >= A.size()
+
+      code = code || instruction::MUL(offset, index, midaA);  //[i]
+
+
+      //Si es 
+      std::string tAux = "%"+codeCounters.newTEMP();
+      if(not Symbols.isLocalVarClass(adB)){                                  //B ESTA PER REFERENCIA
+        std::string contingutB = "%"+codeCounters.newTEMP();
+        code = code || instruction::LOAD(contingutB, adB);
+        code = code || instruction::LOADX(tAux, contingutB,offset);
+      }
+      else{
+        code = code || instruction::LOADX(tAux, adB,offset);
+      }
+
+      if(not Symbols.isLocalVarClass(adA)){                                  //B ESTA PER REFERENCIA
+        std::string contingutA = "%"+codeCounters.newTEMP();
+        code = code || instruction::LOAD(contingutA, adA);
+        code = code || instruction::XLOAD(contingutA, offset, tAux);
+      }
+      else{
+        code = code || instruction::XLOAD(adA, offset, tAux);
+      }
+
+      
+
+      std::string masUno = "%"+codeCounters.newTEMP();
     
+      code = code || instruction::LOAD(masUno, "1") || instruction::ADD(index, index, masUno) || instruction::UJUMP(labelWhile) || instruction::LABEL(labelEndWhile);
+      
     }
     else{
       code = code ||  instruction::LOAD(addr1, resultat);                                                               //NO ES ASSIGNACIO DE ARRAYS    
@@ -846,7 +900,7 @@ void CodeGenListener::exitRelational(AslParser::RelationalContext *ctx) {
       code = code || instruction::LT(temp, addr1, addr2);
     }   
   }
-  
+   
   putAddrDecor(ctx, temp);
   putOffsetDecor(ctx, "");
   putCodeDecor(ctx, code);
