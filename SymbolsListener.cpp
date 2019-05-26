@@ -230,7 +230,6 @@ void SymbolsListener::enterValue(AslParser::ValueContext *ctx) {
   DEBUG_ENTER();
 }
 void SymbolsListener::exitValue(AslParser::ValueContext *ctx) {
-
   DEBUG_EXIT();
 }
 

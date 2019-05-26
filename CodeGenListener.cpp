@@ -481,21 +481,25 @@ void CodeGenListener::enterWriteExpr(AslParser::WriteExprContext *ctx) {
   DEBUG_ENTER();
 }
 void CodeGenListener::exitWriteExpr(AslParser::WriteExprContext *ctx) {
-  instructionList code;
+  instructionList code = getCodeDecor(ctx->expr());
   std::string     addr1 = getAddrDecor(ctx->expr());
-  // std::string     offs1 = getOffsetDecor(ctx->expr());
-  instructionList code1 = getCodeDecor(ctx->expr());
   TypesMgr::TypeId tid1 = getTypeDecor(ctx->expr());
+  
   if(Types.isFloatTy(tid1))
-    code = code1 || instruction::WRITEF(addr1);
+    code = code || instruction::WRITEF(addr1);
   else if(Types.isCharacterTy(tid1)){
-    //code = code1 || instruction::WRITEC(addr1);
     std::string temp = "%"+codeCounters.newTEMP();
     std::string s = ctx->expr()->getText();
-    code = code || instruction::CHLOAD(temp, s.substr(1, s.size()-2)) || instruction::WRITEC(temp);   
+
+    if (Symbols.findInCurrentScope(s)) {      //ident
+	    code = code || instruction::LOAD(temp, addr1) || instruction::WRITEC(temp);   
+	  }
+    else {
+      code = code || instruction::WRITEC(addr1);
+    }
   }
-  else {
-    code = code1 || instruction::WRITEI(addr1); //INT or BOOL
+  else {  //INT or BOOL
+    code = code || instruction::WRITEI(addr1);
   }
   putCodeDecor(ctx, code);
   DEBUG_EXIT();
@@ -921,7 +925,9 @@ void CodeGenListener::exitValue(AslParser::ValueContext *ctx) {
     code = instruction::FLOAD(temp, ctx->getText());
   }
   else if(Types.isCharacterTy(t1)){
-    code = instruction::CHLOAD(temp,ctx->getText());
+    std::string sAux = ctx->getText();
+    sAux = sAux.substr(1, sAux.size()-2);
+    code = instruction::CHLOAD(temp,sAux);
   }
   else if(Types.isBooleanTy(t1)){
     std::string boolVal = ctx->getText();
