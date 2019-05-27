@@ -31,6 +31,28 @@ SymbolsListener::SymbolsListener(TypesMgr       & Types,
   Errors{Errors} {
 }
 
+void SymbolsListener::enterBasic_type(AslParser::Basic_typeContext *ctx){
+  DEBUG_ENTER();
+}
+void SymbolsListener::exitBasic_type(AslParser::Basic_typeContext *ctx){
+    TypesMgr::TypeId t;
+    if(ctx->INT()){
+      t = Types.createIntegerTy();
+    }
+    else if(ctx->BOOL()){
+      t = Types.createBooleanTy();
+    }
+    else if(ctx->FLOAT()){
+      t = Types.createFloatTy();
+    }
+    else if(ctx->CHAR()){
+      t = Types.createCharacterTy();
+    }
+  putTypeDecor(ctx,t);
+  DEBUG_EXIT();
+}
+
+
 void SymbolsListener::enterProgram(AslParser::ProgramContext *ctx) {
   DEBUG_ENTER();
   SymTable::ScopeId sc = Symbols.pushNewScope("$global$");
@@ -63,8 +85,8 @@ void SymbolsListener::exitFunction(AslParser::FunctionContext *ctx) {
 			}
 		}
     TypesMgr::TypeId tRet = Types.createVoidTy();
-		if(ctx->return_type()) tRet = getTypeDecor(ctx->return_type()->type()); 
-		
+		if(ctx->return_type()) tRet = getTypeDecor(ctx->return_type()->type());
+
 		//
     TypesMgr::TypeId tFunc = Types.createFunctionTy(lParamsTy, tRet);
     Symbols.addFunction(ident, tFunc);
@@ -94,7 +116,7 @@ void SymbolsListener::exitDeclarations(AslParser::DeclarationsContext *ctx) {
     }
    }
    DEBUG_EXIT();
- }   
+ }
 
 
 void SymbolsListener::enterVariable_decl(AslParser::Variable_declContext *ctx) {
@@ -130,7 +152,7 @@ void SymbolsListener::exitType(AslParser::TypeContext *ctx) {
     TypesMgr::TypeId t = Types.createBooleanTy();
     putTypeDecor(ctx, t);
   }
-  
+
   else if(ctx->FLOAT()){
     TypesMgr::TypeId t = Types.createFloatTy();
     putTypeDecor(ctx, t);

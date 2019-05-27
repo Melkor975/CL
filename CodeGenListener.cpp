@@ -181,9 +181,9 @@ void CodeGenListener::exitAssignStmt(AslParser::AssignStmtContext *ctx) {
   }
   else{
     if(Types.isArrayTy(tid1) and Types.isArrayTy(tid2)){
-       std::string       label = codeCounters.newLabelWHILE();
-       std::string labelEndWhile = "endwhile"+label;
-       std::string labelWhile = "while" + label;
+      std::string       label = codeCounters.newLabelWHILE();
+      std::string labelEndWhile = "endwhile"+label;
+      std::string labelWhile = "while" + label;
       std::string     adA = addr1;
       std::string     adB = addr2;
 
@@ -364,7 +364,10 @@ void CodeGenListener::exitProcCall(AslParser::ProcCallContext *ctx) {
   // std::string name = ctx->ident()->ID()->getSymbol()->getText();
   std::string name = ctx->ident()->getText();
   code = code || instruction::CALL(name);
-  for(auto p : ctx->expr()){
+  //for(auto p : ctx->expr()){
+  //  code = code || instruction::POP();
+  //}
+  for(uint i=0; i<ctx->expr().size(); i++){
     code = code || instruction::POP();
   }
   code = code || instruction::POP();    //pop del parametre de retorn
@@ -403,8 +406,11 @@ void CodeGenListener::exitReturn_func(AslParser::Return_funcContext *ctx){
   // std::string name = ctx->ident()->ID()->getSymbol()->getText();
   std::string name = ctx->ident()->getText();
   code = code || instruction::CALL(name);
-  for(auto p : ctx->expr()){
-    code = code || instruction::POP();
+  //for(auto p : ctx->expr()){
+  //  code = code || instruction::POP();
+  //}
+  for(uint i=0; i < ctx->expr().size(); i++){
+      code = code || instruction::POP();
   }
   std::string temp = "%"+codeCounters.newTEMP();
   code = code || instruction::POP(temp);        //pop que omple la variable que retorna
@@ -488,15 +494,18 @@ void CodeGenListener::exitWriteExpr(AslParser::WriteExprContext *ctx) {
   if(Types.isFloatTy(tid1))
     code = code || instruction::WRITEF(addr1);
   else if(Types.isCharacterTy(tid1)){
-    std::string temp = "%"+codeCounters.newTEMP();
+    code = code || instruction::WRITEC(addr1);
+    
+    /*
     std::string s = ctx->expr()->getText();
-
+    std::string temp = "%"+codeCounters.newTEMP();
     if (Symbols.findInCurrentScope(s)) {      //ident
 	    code = code || instruction::LOAD(temp, addr1) || instruction::WRITEC(temp);   
 	  }
     else {
       code = code || instruction::WRITEC(addr1);
     }
+    */
   }
   else {  //INT or BOOL
     code = code || instruction::WRITEI(addr1);
@@ -770,7 +779,7 @@ void CodeGenListener::exitRelational(AslParser::RelationalContext *ctx) {
   instructionList code  = code1 || code2;
   TypesMgr::TypeId t1 = getTypeDecor(ctx->expr(0));
   TypesMgr::TypeId t2 = getTypeDecor(ctx->expr(1));
-  TypesMgr:: TypeId t  = getTypeDecor(ctx);
+  //TypesMgr:: TypeId t  = getTypeDecor(ctx);
   std::string temp;
   
   if(ctx->EQUAL()){
@@ -933,6 +942,7 @@ void CodeGenListener::exitValue(AslParser::ValueContext *ctx) {
     std::string boolVal = ctx->getText();
     if(boolVal == "true") boolVal = "1";
     else boolVal = "0";
+
     code = instruction::LOAD(temp,boolVal);
   }
   putAddrDecor(ctx, temp);

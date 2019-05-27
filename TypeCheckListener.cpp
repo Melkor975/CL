@@ -192,24 +192,24 @@ void TypeCheckListener::exitProcCall(AslParser::ProcCallContext *ctx) {
   TypesMgr::TypeId t1 = getTypeDecor(ctx->ident());
   
   if(Types.isFunctionTy(t1)){
-    TypesMgr::TypeId return_ty = Types.getFuncReturnType(t1);
+    //TypesMgr::TypeId return_ty = Types.getFuncReturnType(t1);
     //assert(Types.isVoidTy(return_ty));
     //if(not Types.isVoidTy(return_ty)){
     //	Errors.isNotProcedure(ctx->ident());
     //}
     
     int numParams = Types.getNumOfParameters(t1);
-    int comptadorParams = 0;  
-    if(ctx->expr(0)){
-      for(auto i:ctx->expr()) comptadorParams++;
-    }
+    int comptadorParams = ctx->expr().size();  
+    //if(ctx->expr(0)){
+    //  for(auto i:ctx->expr()) comptadorParams++;
+    //}
     if(comptadorParams != numParams){
     		Errors.numberOfParameters(ctx->ident());
     }
     else{
       vector<TypesMgr::TypeId> param_types = Types.getFuncParamsTypes(t1);
 
-      for(int i = 0; i < Types.getNumOfParameters(t1); i++){
+      for(uint i = 0; i < Types.getNumOfParameters(t1); i++){
           if(not Types.copyableTypes(param_types[i] , getTypeDecor(ctx->expr(i))))
             Errors.incompatibleParameter(ctx->expr(i), i+1, ctx->ident());
         
@@ -239,17 +239,17 @@ TypesMgr::TypeId tAux = Types.createErrorTy();
     else tAux = return_ty;
     
     int numParams = Types.getNumOfParameters(t1);
-    int comptadorParams = 0;  
-    if(ctx->expr(0)){
-      for(auto i:ctx->expr()) comptadorParams++;
-    }
+    int comptadorParams = ctx->expr().size();  
+    //if(ctx->expr(0)){
+    //  for(auto i:ctx->expr()) comptadorParams++;
+    //}
     if(comptadorParams != numParams){
         Errors.numberOfParameters(ctx->ident());
     }
     else{
       vector<TypesMgr::TypeId> param_types = Types.getFuncParamsTypes(t1);
       
-      for(int i = 0; i < Types.getNumOfParameters(t1); i++){
+      for(uint i = 0; i < Types.getNumOfParameters(t1); i++){
           if(not Types.copyableTypes(param_types[i] , getTypeDecor(ctx->expr(i))))
             Errors.incompatibleParameter(ctx->expr(i), i+1, ctx->ident());
         

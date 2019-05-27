@@ -35,7 +35,7 @@ variable_decl
         : VAR ID (',' ID)* ':' type
         ;
 
-type    : vect 
+type    : vect
         | INT
         | BOOL
         | FLOAT
@@ -43,6 +43,9 @@ type    : vect
         ;
 
 vect    : ARRAY '[' INTVAL ']' OF type
+        ;
+
+basic_type: (INT|BOOL|FLOAT|CHAR)
         ;
 
 statements
@@ -71,24 +74,24 @@ statement
         | WRITE STRING ';'                                          # writeString
         ;
 
-        
+
 // Grammar for left expressions (l-values in C++)
 left_expr
-        : ident ( |'[' expr ']')       
+        : ident ( |'[' expr ']')
         ;
 
 // Grammar for expressions with boolean, relational and aritmetic operators
 expr    : ident '[' expr ']'                             # array_read
         | op=(NOT|PLUS|MINUS) expr                       # notplusminus
         | '(' expr ')'                                   # par
-        | ident '(' ( |expr (',' expr)*) ')'             # return_func  
+        | ident '(' ( |expr (',' expr)*) ')'             # return_func
         | expr op=(MUL|DIV|MOD) expr                     # arithmetic
         | expr op=(PLUS|MINUS) expr                      # arithmetic
         | expr op=(EQUAL|NE|GT|GE|LE|LT)  expr           # relational
 	| expr op=AND  expr		                 # logic
 	| expr op=OR   expr		                 # logic
 //      | (INTVAL|FLOATVAL|CHARVAL)                      # value
-        | INTVAL			                 # value		
+        | INTVAL			                 # value
       	| FLOATVAL			                 # value
        	| CHARVAL			                 # value
         | BOOLVAL                                        # value
@@ -149,8 +152,8 @@ BOOLVAL   : ('true'|'false');
 INTVAL    : ('0'..'9')+ ;
 FLOATVAL  : ('0'..'9')+ ( | ('.' ('0'..'9')+) );
 //fragment NEWLINE : '\r' '\n' | '\n' | '\r';
-CHARVAL   : ('\'' ((~('\\'|'\'')) | ESC_SEQ) '\'');     
-ID        : ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')* ;                                
+CHARVAL   : ('\'' ((~('\\'|'\'')) | ESC_SEQ) '\'');
+ID        : ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')* ;
 
 
 // Strings (in quotes) with escape sequences
@@ -162,8 +165,7 @@ ESC_SEQ   : '\\' ('b'|'t'|'n'|'f'|'r'|'"'|'\''|'\\') ;
 // Comments (inline C++-style)
 COMMENT   : '//' ~('\n'|'\r')* '\r'? '\n' -> skip ;
 
-// White spaces 
+// White spaces
 WS        : (' '|'\t'|'\r'|'\n')+ -> skip ;
 // Alternative description
 // WS        : [ \t\r\n]+ -> skip ;
-

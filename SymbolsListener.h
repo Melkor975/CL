@@ -28,13 +28,17 @@ public:
 		  TreeDecoration & TreeNodeProps,
 		  SemErrors      & Errors);
 
+
+  void enterBasic_type(AslParser::Basic_typeContext *ctx);
+  void exitBasic_type(AslParser::Basic_typeContext *ctx);
+
   void enterProgram(AslParser::ProgramContext *ctx);
   void exitProgram(AslParser::ProgramContext *ctx);
 
   void enterFunction(AslParser::FunctionContext *ctx);
   void exitFunction(AslParser::FunctionContext *ctx);
 
-  void enterReturn_func(AslParser::Return_funcContext *ctx); 
+  void enterReturn_func(AslParser::Return_funcContext *ctx);
   void exitReturn_func(AslParser::Return_funcContext *ctx);
 
   void enterDeclarations(AslParser::DeclarationsContext *ctx);
