@@ -74,7 +74,7 @@ void TypeCheckListener::enterFunction(AslParser::FunctionContext *ctx) {
   DEBUG_ENTER();
   SymTable::ScopeId sc = getScopeDecor(ctx);
   Symbols.pushThisScope(sc);
-  
+
   TypesMgr::TypeId tRet = Types.createVoidTy();
   if(ctx->return_type()){
     tRet = getTypeDecor(ctx->return_type()->type());
@@ -133,8 +133,8 @@ void TypeCheckListener::exitAssignStmt(AslParser::AssignStmtContext *ctx) {
 
   if ((not Types.isErrorTy(t1)) and (not getIsLValueDecor(ctx->left_expr())))
     Errors.nonReferenceableLeftExpr(ctx->left_expr());
-  
-	
+
+
   DEBUG_EXIT();
 }
 
@@ -190,16 +190,16 @@ void TypeCheckListener::enterProcCall(AslParser::ProcCallContext *ctx) {
 }
 void TypeCheckListener::exitProcCall(AslParser::ProcCallContext *ctx) {
   TypesMgr::TypeId t1 = getTypeDecor(ctx->ident());
-  
+
   if(Types.isFunctionTy(t1)){
     //TypesMgr::TypeId return_ty = Types.getFuncReturnType(t1);
     //assert(Types.isVoidTy(return_ty));
     //if(not Types.isVoidTy(return_ty)){
     //	Errors.isNotProcedure(ctx->ident());
     //}
-    
+
     int numParams = Types.getNumOfParameters(t1);
-    int comptadorParams = ctx->expr().size();  
+    int comptadorParams = ctx->expr().size();
     //if(ctx->expr(0)){
     //  for(auto i:ctx->expr()) comptadorParams++;
     //}
@@ -212,7 +212,7 @@ void TypeCheckListener::exitProcCall(AslParser::ProcCallContext *ctx) {
       for(uint i = 0; i < Types.getNumOfParameters(t1); i++){
           if(not Types.copyableTypes(param_types[i] , getTypeDecor(ctx->expr(i))))
             Errors.incompatibleParameter(ctx->expr(i), i+1, ctx->ident());
-        
+
       }
 
     }
@@ -220,7 +220,7 @@ void TypeCheckListener::exitProcCall(AslParser::ProcCallContext *ctx) {
   else if (not Types.isFunctionTy(t1) and not Types.isErrorTy(t1)) { //treure la primera comprovacio, pero es per recordar el que fa
     Errors.isNotCallable(ctx->ident());
   }
-	
+
   DEBUG_EXIT();
 }
 
@@ -232,14 +232,14 @@ TypesMgr::TypeId t1 = getTypeDecor(ctx->ident());
 TypesMgr::TypeId tAux = Types.createErrorTy();
   if(Types.isFunctionTy(t1)){
     TypesMgr::TypeId return_ty = Types.getFuncReturnType(t1);
-    
+
     if(Types.isVoidTy(return_ty)){
     	Errors.isNotFunction(ctx->ident());
     }
     else tAux = return_ty;
-    
+
     int numParams = Types.getNumOfParameters(t1);
-    int comptadorParams = ctx->expr().size();  
+    int comptadorParams = ctx->expr().size();
     //if(ctx->expr(0)){
     //  for(auto i:ctx->expr()) comptadorParams++;
     //}
@@ -248,15 +248,15 @@ TypesMgr::TypeId tAux = Types.createErrorTy();
     }
     else{
       vector<TypesMgr::TypeId> param_types = Types.getFuncParamsTypes(t1);
-      
+
       for(uint i = 0; i < Types.getNumOfParameters(t1); i++){
           if(not Types.copyableTypes(param_types[i] , getTypeDecor(ctx->expr(i))))
             Errors.incompatibleParameter(ctx->expr(i), i+1, ctx->ident());
-        
+
       }
     }
-    
-    
+
+
   }
   else if (not Types.isFunctionTy(t1) and not Types.isErrorTy(t1)) { //treure la primera comprovacio, pero es per recordar el que fa
     Errors.isNotCallable(ctx->ident());
@@ -305,29 +305,29 @@ void TypeCheckListener::exitLeft_expr(AslParser::Left_exprContext *ctx) {
   TypesMgr::TypeId t1 = getTypeDecor(ctx->ident());
   TypesMgr::TypeId tRes = Types.createErrorTy();
   //cout << not Types.isErrorTy(t1) << endl;
-  
+
   if(ctx->expr()){
     bool estaBe = true;
     if(not Types.isErrorTy(t1) and not Types.isArrayTy(t1)){
       Errors.nonArrayInArrayAccess(ctx->ident());
       estaBe = false;
     }
-    
+
     TypesMgr::TypeId t2 = getTypeDecor(ctx->expr());
     if(not Types.isErrorTy(t2) and not Types.isIntegerTy(t2)){
       Errors.nonIntegerIndexInArrayAccess(ctx->expr());
       estaBe = false;
     }
-    
+
     if(estaBe and not Types.isErrorTy(t1)){
       tRes = Types.getArrayElemType(t1);
     }
-  
+
   }
   else {
     tRes = t1;
   }
-  
+
 
   putTypeDecor(ctx, tRes);
   bool b = getIsLValueDecor(ctx->ident());
@@ -350,7 +350,7 @@ void TypeCheckListener::exitArray_read(AslParser::Array_readContext *ctx){
     Errors.nonArrayInArrayAccess(ctx->ident());
     estaBe = false;
   }
-  
+
   TypesMgr::TypeId t2 = getTypeDecor(ctx->expr());
   if(not Types.isErrorTy(t2) and not Types.isIntegerTy(t2)){
     Errors.nonIntegerIndexInArrayAccess(ctx->expr());
@@ -408,8 +408,8 @@ void TypeCheckListener::exitRelational(AslParser::RelationalContext *ctx) {
       (not Types.comparableTypes(t1, t2, oper))){
     Errors.incompatibleOperator(ctx->op);
   }
-  
-   
+
+
   putTypeDecor(ctx, t);
   putIsLValueDecor(ctx, false);
   DEBUG_EXIT();
@@ -424,15 +424,16 @@ void TypeCheckListener::exitNotplusminus(AslParser::NotplusminusContext *ctx){
   TypesMgr::TypeId t1 = getTypeDecor(ctx->expr());
   TypesMgr::TypeId t = Types.createVoidTy();
   if(ctx->NOT()){
-    if((not Types.isErrorTy(t1)) and (not Types.isBooleanTy(t1))){
-        Errors.booleanRequired(ctx->expr());
-        //t = Types.createErrorTy();
-    }
+		if((not Types.isErrorTy(t1)) and (not Types.isBooleanTy(t1))){
+			Errors.incompatibleOperator(ctx->op);
+			//Errors.booleanRequired(ctx->expr());
+			//t = Types.createErrorTy();
+	}
      t = Types.createBooleanTy();
-    
+
   }
   else if(ctx->PLUS()){
-    if(not Types.isErrorTy(t1) and not Types.isNumericTy(t1)){ 
+    if(not Types.isErrorTy(t1) and not Types.isNumericTy(t1)){
       Errors.incompatibleOperator(ctx->op);
     }
     t = Types.createIntegerTy();
@@ -441,7 +442,7 @@ void TypeCheckListener::exitNotplusminus(AslParser::NotplusminusContext *ctx){
     }
   }
   else if(ctx->MINUS()){
-    if(not Types.isErrorTy(t1) and not Types.isNumericTy(t1)){ 
+    if(not Types.isErrorTy(t1) and not Types.isNumericTy(t1)){
       Errors.incompatibleOperator(ctx->op);
     }
     t = Types.createIntegerTy();
@@ -493,7 +494,7 @@ void TypeCheckListener::exitValue(AslParser::ValueContext *ctx) { //NO SE SI HAU
   else if(ctx->BOOLVAL()){
     t = Types.createBooleanTy();
   }
-  
+
   else if(ctx->FLOATVAL()){
     t = Types.createFloatTy();
   }

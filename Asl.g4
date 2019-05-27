@@ -81,22 +81,24 @@ left_expr
         ;
 
 // Grammar for expressions with boolean, relational and aritmetic operators
-expr    : ident '[' expr ']'                             # array_read
-        | op=(NOT|PLUS|MINUS) expr                       # notplusminus
-        | '(' expr ')'                                   # par
+expr    :   '(' expr ')'                                 # par
+        | ident '[' expr ']'                             # array_read
+        //| ident '.' (FIRST | SECOND)                     # pair_read
         | ident '(' ( |expr (',' expr)*) ')'             # return_func
+        | op=(NOT|PLUS|MINUS) expr                       # notplusminus
         | expr op=(MUL|DIV|MOD) expr                     # arithmetic
         | expr op=(PLUS|MINUS) expr                      # arithmetic
         | expr op=(EQUAL|NE|GT|GE|LE|LT)  expr           # relational
-	| expr op=AND  expr		                 # logic
-	| expr op=OR   expr		                 # logic
+	      | expr op=AND  expr		                           # logic
+	      | expr op=OR   expr		                           # logic
 //      | (INTVAL|FLOATVAL|CHARVAL)                      # value
-        | INTVAL			                 # value
-      	| FLOATVAL			                 # value
-       	| CHARVAL			                 # value
+        | INTVAL			                                   # value
+      	| FLOATVAL			                                 # value
+       	| CHARVAL			                                   # value
         | BOOLVAL                                        # value
         | ident                                          # exprIdent
         ;
+
 
 
 ident   : ID
